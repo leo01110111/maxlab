@@ -1,0 +1,6 @@
+{
+  // Markdown: auto-continue list/checkbox items on Enter.
+  "[markdown]": {
+    "editor.formatOnType": true
+  }
+}
