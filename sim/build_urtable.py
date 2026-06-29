@@ -28,6 +28,35 @@ import mujoco
 UR7E_PATH = "universal_robots_ur5e/ur5e.xml"
 ROBOTIQ_PATH = "gripper/robotiq-2f85.xml"
 
+# Wrist camera hardware (one per arm): an ArduCam OV9782 board bolted to a printed
+# bracket that saddles the Robotiq base, looking forward over the fingers at the
+# grasp. STLs are in mm (scaled 0.001) and live in the gripper assets dir so they
+# travel with the gripper subtree on attach.
+WRIST_MOUNT_MESH = "wrist_cam_mount.stl"     # resolved via the gripper meshdir (assets/)
+WRIST_CAM_MESH = "arducam_ov9782.stl"
+# OV9782 global-shutter color module specs (true sensor specs).
+WRIST_CAM_FOVY = 92.0                         # diagonal/vertical FOV of the fisheye lens (deg)
+WRIST_CAM_RES = (1280, 800)                   # native resolution (w, h)
+# Placement in the Robotiq base_mount frame (+z = approach/finger direction).
+# The base body has quat=[1,0,0,-1] (−90° Z rotation) so its back face (y=+36mm
+# in base.stl) maps to +X in base_mount frame.  That is the face shown in the
+# photo where the bracket attaches (4 cam_bolt_* sites on that face).
+# The lens (cam mesh +z) aims toward the pinch point over the fingers.
+WRIST_MOUNT_POS = (0.04, 0.0, 0.05)           # +X = back face of Robotiq body
+WRIST_LENS_DIR = (-0.45, 0.0, 0.9)            # lens points inward (-X) and up toward grasp
+WRIST_CAM_LOCAL_POS = (0.0, -0.0045, 0.0085)  # cam board on the bracket's scoop face
+
+# Robotiq-attachment saddle holes in the wrist_cam_mount.stl frame.
+# These are on the CURVED SADDLE WALLS (z≈0mm, NOT the flat plate at z=-40mm).
+# Positions are analytically derived: R_mount @ (robotiq_cam_bolt_bm - WRIST_MOUNT_POS),
+# confirmed by vertex-density checks (98/92 verts within 5mm of top pair).
+# The mount only has 2 saddle holes mating with the Robotiq top bolt pair;
+# the "bot" sites below are the closest structural holes found (~15.4mm).
+MOUNT_HOLE_TOP_R = ( 0.0089, -0.00657,  0.00027)  # saddle hole, aligns with cam_bolt_top_r
+MOUNT_HOLE_TOP_L = (-0.0089, -0.00657,  0.00027)  # saddle hole, aligns with cam_bolt_top_l
+MOUNT_HOLE_BOT_R = ( 0.0154,  0.00062,  0.00250)  # structural hole, nearest to cam_bolt_bot_r
+MOUNT_HOLE_BOT_L = (-0.0158,  0.00028,  0.00249)  # structural hole, nearest to cam_bolt_bot_l
+
 # ---------------------------------------------------------------- measurements
 TABLE_H = 0.76          # aluminum frame top height
 BOARD_T = 0.015         # black board thickness (on top of the frame)
@@ -106,12 +135,74 @@ def _lookat_quat(cam_pos, target):
     return quat
 
 
+def _wrist_mount_quat(lens_dir, anchor) -> np.ndarray:
+    """Quaternion orienting the wrist bracket so the camera mesh's +z (the lens
+    optical axis) points along lens_dir, and the bracket's base plate (the mesh's
+    -y side) tucks toward `anchor` (the direction from the mount back to the
+    gripper body). Built from an orthonormal frame: +z -> lens, -y -> the part of
+    anchor perpendicular to the lens, +x -> their cross."""
+    f = np.asarray(lens_dir, float)
+    f /= np.linalg.norm(f)
+    a = np.asarray(anchor, float)
+    d = a - f * (a @ f)                          # image of mesh -y (drop the lens component)
+    d = d / np.linalg.norm(d) if np.linalg.norm(d) > 1e-6 else np.array([1.0, 0, 0])
+    colx = np.cross(-d, f)
+    colx /= np.linalg.norm(colx)
+    mat = np.column_stack([colx, -d, f]).flatten()   # columns = images of +x,+y,+z
+    quat = np.zeros(4)
+    mujoco.mju_mat2Quat(quat, mat)
+    return quat
+
+
+def _attach_wrist_camera(gripper: mujoco.MjSpec) -> None:
+    """Add the printed bracket + ArduCam OV9782 + a MuJoCo camera onto the gripper
+    base_mount, in place. Called before the gripper is attached so it inherits the
+    per-arm prefix (final names like 'left_grip_wrist'). Meshes are visual-only
+    (no contacts) and massless so they don't perturb the arm dynamics."""
+    gripper.add_mesh(name="wrist_cam_mount", file=WRIST_MOUNT_MESH, scale=[0.001] * 3)
+    gripper.add_mesh(name="arducam", file=WRIST_CAM_MESH, scale=[0.001] * 3)
+
+    base_mount = gripper.body("base_mount")
+    # The base plate should tuck back toward the gripper body, i.e. opposite the
+    # mount's lateral offset from the base_mount axis.
+    anchor = (-WRIST_MOUNT_POS[0], -WRIST_MOUNT_POS[1], 0.0)
+    mount = base_mount.add_body(name="wrist_mount", pos=list(WRIST_MOUNT_POS),
+                                quat=list(_wrist_mount_quat(WRIST_LENS_DIR, anchor)))
+    g = mount.add_geom(name="wrist_mount", type=mujoco.mjtGeom.mjGEOM_MESH,
+                       meshname="wrist_cam_mount", rgba=[0.45, 0.62, 0.78, 1])
+    g.contype, g.conaffinity, g.mass = 0, 0, 0.04
+
+    # Bolt-hole sites on the mount base plate; paired with cam_bolt_* sites on the
+    # Robotiq base body for verifying / correcting alignment.
+    for sname, spos in (("mnt_hole_top_r", MOUNT_HOLE_TOP_R),
+                        ("mnt_hole_top_l", MOUNT_HOLE_TOP_L),
+                        ("mnt_hole_bot_r", MOUNT_HOLE_BOT_R),
+                        ("mnt_hole_bot_l", MOUNT_HOLE_BOT_L)):
+        s = mount.add_site(name=sname, type=mujoco.mjtGeom.mjGEOM_SPHERE,
+                           size=[0.003, 0, 0], rgba=[0, 1, 0, 1], group=5)
+        s.pos = list(spos)
+
+    # Camera board sits on the bracket's scoop face; the cam mesh's +z is the lens.
+    cam_body = mount.add_body(name="wrist_cam", pos=list(WRIST_CAM_LOCAL_POS))
+    g2 = cam_body.add_geom(name="wrist_cam", type=mujoco.mjtGeom.mjGEOM_MESH,
+                           meshname="arducam", rgba=[0.12, 0.12, 0.13, 1])
+    g2.contype, g2.conaffinity, g2.mass = 0, 0, 0.01
+
+    # MuJoCo cameras look down their own -z, so flip 180 about x to look along +z.
+    flip = np.zeros(4)
+    mujoco.mju_euler2Quat(flip, np.deg2rad([180.0, 0.0, 0.0]), "XYZ")
+    cam = cam_body.add_camera(name="wrist", quat=list(flip), fovy=WRIST_CAM_FOVY)
+    cam.resolution = list(WRIST_CAM_RES)
+
+
 def _arm_with_gripper() -> mujoco.MjSpec:
     """Load a UR7e and bolt a Robotiq 2F-85 onto its wrist attachment site. The
     gripper's coupling (equality constraints + tendon) and its single actuator
-    come along with the attach, prefixed 'grip_'."""
+    come along with the attach, prefixed 'grip_'. A wrist camera + bracket is
+    mounted on the gripper first so it inherits the same prefix."""
     arm = mujoco.MjSpec.from_file(UR7E_PATH)
     gripper = mujoco.MjSpec.from_file(ROBOTIQ_PATH)
+    _attach_wrist_camera(gripper)
     arm.site("attachment_site").attach_body(gripper.body("base_mount"), "grip_", "")
     return arm
 
@@ -120,8 +211,10 @@ def build_spec() -> mujoco.MjSpec:
     """Construct the floor, table, board, plates, two UR7e arms, and cameras."""
     spec = mujoco.MjSpec()
     spec.compiler.autolimits = True
+    # Offscreen buffer sized for the OV9782 wrist cameras (1280x800); covers the
+    # smaller top-camera / policy renders too.
     spec.visual.global_.offwidth = 1280
-    spec.visual.global_.offheight = 960
+    spec.visual.global_.offheight = 800
     spec.visual.headlight.ambient = [0.6, 0.6, 0.6]
     spec.visual.headlight.diffuse = [1.0, 1.0, 1.0]
 

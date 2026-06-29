@@ -81,6 +81,15 @@ class SimBimanualUR7eEnv(gym.Env):
 
         self._renderer = mujoco.Renderer(self.model, height=image_size, width=image_size)
 
+        # Camera roles -> MuJoCo camera names. 'top1' feeds the policy obs 'image';
+        # the two wrist cameras (ArduCam OV9782 on each gripper) feed OpenPi's
+        # wrist_image keys. See build_urtable._attach_wrist_camera.
+        self.cameras = {
+            "top1": "top1",
+            "left": "left_grip_wrist",
+            "right": "right_grip_wrist",
+        }
+
         # --- action space ---
         self._ctrl_low = self.model.actuator_ctrlrange[:, 0].copy()
         self._ctrl_high = self.model.actuator_ctrlrange[:, 1].copy()
@@ -108,11 +117,16 @@ class SimBimanualUR7eEnv(gym.Env):
         action = np.clip(action, -1.0, 1.0)
         return self._ctrl_low + (action + 1.0) * 0.5 * (self._ctrl_high - self._ctrl_low)
 
-    def render_cameras(self) -> dict[str, np.ndarray]:
-        """Render the camera(s) feeding the observation. Returns
-        {name: (H, W, 3) uint8 RGB}. Only top1 is used for now."""
-        self._renderer.update_scene(self.data, camera="top1")
-        return {"top1": self._renderer.render()}  # uint8 RGB
+    def render_cameras(self, roles=None) -> dict[str, np.ndarray]:
+        """Render the requested camera roles (default: all of self.cameras).
+        Returns {role: (H, W, 3) uint8 RGB}. The OGPO obs only needs 'top1'; the
+        OpenPi obs additionally uses the 'left'/'right' wrist cameras."""
+        roles = roles if roles is not None else self.cameras.keys()
+        frames = {}
+        for role in roles:
+            self._renderer.update_scene(self.data, camera=self.cameras[role])
+            frames[role] = self._renderer.render()  # uint8 RGB
+        return frames
 
     def _proprio(self) -> np.ndarray:
         """Per-actuator joint position (nu,): 12 arm joints + 2 gripper drivers.
@@ -124,7 +138,7 @@ class SimBimanualUR7eEnv(gym.Env):
         return out
 
     def _get_obs(self) -> dict:
-        frames = self.render_cameras()
+        frames = self.render_cameras(["top1"])  # OGPO obs is top1 only
         return {"state": self._proprio(), "image": frames["top1"]}
 
     def get_openpi_observation(self, prompt: str | None = None) -> dict:

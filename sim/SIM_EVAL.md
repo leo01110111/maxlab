@@ -47,9 +47,12 @@ images to 224×224 (via `openpi_client.image_tools` when available), calls
 `client.infer(obs)["actions"]`, and replays the action chunk open-loop,
 replanning every `--replan-steps` steps.
 
-> Camera → key mapping (`top1 → observation/image`, `top2 → observation/wrist_image`)
-> and the action dimension/order must match what the checkpoint was trained on.
-> Adjust `get_openpi_observation()` for your checkpoint.
+> Camera → key mapping (`top1 → observation/image`; the per-gripper ArduCam
+> OV9782 wrist cameras `left_grip_wrist`/`right_grip_wrist` →
+> `observation/wrist_image/left` and `/right`) and the action dimension/order
+> must match what the checkpoint was trained on. The role→camera names live in
+> `env.SimBimanualUR7eEnv.cameras`; adjust `get_openpi_observation()` for your
+> checkpoint.
 
 ## OGPO (in-process)
 

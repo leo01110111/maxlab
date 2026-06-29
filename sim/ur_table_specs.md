@@ -27,6 +27,14 @@ Cameras (Intel RealSense D435):
 - **Camera 2:** 52 cm height from the board; 74.5 cm from the left edge; 10 cm from
   the front edge.
 
+Wrist cameras (ArduCam OV9782, one per gripper):
+- Global-shutter color module on a printed bracket that saddles the Robotiq 2F-85
+  base and aims the lens forward over the fingers at the grasp (see photo).
+- True specs: **1280×800** native resolution, **fovy 92°** (fisheye lens).
+- In sim: `left_grip_wrist` / `right_grip_wrist`, mounted in
+  `build_urtable._attach_wrist_camera`. STLs in `gripper/assets/` (`wrist_cam_mount.stl`,
+  `arducam_ov9782.stl`).
+
 ## Model coordinate frame (as built in `build_urtable.py`)
 
 Origin at the **center of the table footprint, on the floor (z = 0)**.
