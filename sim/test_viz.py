@@ -6,7 +6,7 @@ import mujoco.viewer
 import numpy as np
 from build_urtable import apply_initial_view, build_scene, capture_state
 
-CAMERAS = ["top1", "top2"]
+CAMERAS = ["top1"]
 
 
 def main():

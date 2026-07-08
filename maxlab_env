@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Activate the maxlab virtualenv (.venv).
+#
+# Usage:
+#   ./maxlab_env          run it -> drops you into a shell with the venv active
+#   source ./maxlab_env   activate in your CURRENT shell instead of a subshell
+#
+# Exit the spawned shell with `exit` (or Ctrl-D) to return to your normal shell.
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+source "$REPO/.venv/bin/activate"
+
+echo "maxlab venv active  ($REPO/.venv)"
+
+# If executed (not sourced), keep the environment alive in an interactive shell.
+if ! (return 0 2>/dev/null); then
+    exec "${SHELL:-bash}" -i
+fi
