@@ -83,7 +83,7 @@ class SimBimanualUR7eEnv(gym.Env):
 
         # Camera roles -> MuJoCo camera names. 'top1' feeds the policy obs 'image';
         # the two wrist cameras (ArduCam OV9782 on each gripper) feed OpenPi's
-        # wrist_image keys. See build_urtable._attach_wrist_camera.
+        # wrist_image keys. The wrist camera is defined in gripper/robotiq-2f85.xml.
         self.cameras = {
             "top1": "top1",
             "left": "left_grip_wrist",

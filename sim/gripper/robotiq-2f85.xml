@@ -17,6 +17,8 @@
     <mesh class="2f85" file="pad.stl"/>
     <mesh class="2f85" file="silicone_pad.stl"/>
     <mesh class="2f85" file="spring_link.stl"/>
+    <mesh class="2f85" file="arducam_ov9782.stl"/>
+    <mesh class="2f85" file="wrist_cam_mount.stl"/>
   </asset>
 
   <default>
@@ -66,14 +68,29 @@
         <geom class="visual" mesh="base" material="black"/>
         <geom class="collision" mesh="base"/>
         <site name="pinch" pos="0 0 0.145" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
-        <!-- Cam-mount attach sites: 4 M5 threaded holes on the back face of the
-             base body (back = +y direction in base.stl frame, i.e. the face
-             opposite the finger slot).  Positions measured from base.stl at 1mm
-             resolution; group=5 keeps them invisible by default. -->
-        <site name="cam_bolt_top_r"  pos=" 0.0089  0.034  0.0435" size="0.003" group="5" rgba="1 0.5 0 1"/>
-        <site name="cam_bolt_top_l"  pos="-0.0089  0.034  0.0435" size="0.003" group="5" rgba="1 0.5 0 1"/>
-        <site name="cam_bolt_bot_r"  pos=" 0.0170  0.033  0.0315" size="0.003" group="5" rgba="1 0.5 0 1"/>
-        <site name="cam_bolt_bot_l"  pos="-0.0166  0.033  0.0315" size="0.003" group="5" rgba="1 0.5 0 1"/>
+        <!-- ===================== WRIST CAMERA — TUNE HERE ====================
+             ArduCam OV9782 on a printed bracket that saddles the Robotiq base,
+             looking over the fingers at the grasp.  Two nested frames, two
+             independent tuning points:
+
+             1) wrist_mount  — the printed bracket. Its pos/quat place the BRACKET
+                in the `base` frame.  base frame: +y = back face of the Robotiq,
+                +z = toward fingers.
+             2) wrist_cam    — the camera + sensor board. Its pos/quat place the
+                CAMERA in the BRACKET (wrist_mount) frame.  The arducam mesh's +z
+                is the lens, and the inner camera's quat="0 1 0 0" makes the MuJoCo
+                camera (which views along -z) look along +z too — so +z is "where
+                the camera looks".
+             All geoms are massless / non-colliding so they never perturb dynamics. -->
+        <body name="wrist_mount" pos="0.04 0 0.05" quat="0.6682 0.2312 0.2312 -0.6682">
+          <geom name="wrist_mount" type="mesh" mesh="wrist_cam_mount" contype="0"
+                conaffinity="0" mass="0" rgba="0.45 0.62 0.78 1"/>
+          <body name="wrist_cam" pos="0 0 0.05" quat="1 0 0 0">
+            <geom name="wrist_cam" type="mesh" mesh="arducam_ov9782" contype="0"
+                  conaffinity="0" mass="0" rgba="0.12 0.12 0.13 1"/>
+            <camera name="wrist" quat="0 1 0 0" fovy="92" resolution="1280 800"/>
+          </body>
+        </body>
         <!-- Right-hand side 4-bar linkage -->
         <body name="right_driver" pos="0 0.0306011 0.054904">
           <inertial mass="0.00899563" pos="2.96931e-12 0.0177547 0.00107314" quat="0.681301 0.732003 0 0"
