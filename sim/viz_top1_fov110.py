@@ -22,7 +22,7 @@ import mujoco.viewer
 import numpy as np
 
 from build_urtable import (
-    CAM1_POS,
+    CAM_POS,
     _lookat_quat,
     apply_initial_view,
     build_spec,
@@ -30,7 +30,7 @@ from build_urtable import (
     set_initial_pose,
 )
 
-CAMERAS = ["top1", "top2"]
+CAMERAS = ["top1"]
 RENDER_W, RENDER_H = 450, 300          # per-camera render size; aspect = W/H
 TOP1_HFOV_DEG = 70.0                   # desired horizontal FOV for top1
 
@@ -55,7 +55,7 @@ def build_scene_top1_wide() -> tuple[mujoco.MjModel, mujoco.MjData]:
     # Reorient top1: move it to the midpoint of the table length (x=0, keeping its
     # front-edge y and height), and aim it straight forward (horizontal, along +y,
     # the "into the table" direction) instead of angled down at the work center.
-    new_pos = (0.0, CAM1_POS[1], CAM1_POS[2])
+    new_pos = (0.0, CAM_POS[1], CAM_POS[2])
     forward_target = (new_pos[0], new_pos[1] + 1.0, new_pos[2])   # +y, same height
     quat = _lookat_quat(new_pos, forward_target)
     top1_body = spec.body("top1_body")
@@ -90,7 +90,7 @@ def main():
                 frames.append(renderer.render())     # (H, W, 3) uint8 RGB
 
             combined = np.hstack(frames)             # side by side
-            cv2.imshow(f"cameras (left: top1 @{TOP1_HFOV_DEG:.0f}deg HFOV, right: top2)",
+            cv2.imshow(f"camera (top1 @{TOP1_HFOV_DEG:.0f}deg HFOV)",
                        combined[..., ::-1])          # RGB -> BGR for OpenCV
             # Controls (focus the OpenCV window): 's' = print pose+view, 'q' = quit.
             key = cv2.waitKey(1) & 0xFF
