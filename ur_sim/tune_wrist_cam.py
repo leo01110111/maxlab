@@ -6,7 +6,7 @@ Opens an orbitable 3D view of the scene plus a window of sliders that move the
 press `p` to dump paste-ready XML to the terminal, `r` to reset to the values the
 model loaded with, `q`/Esc to quit.
 
-Run from the sim/ directory:  python tune_wrist_cam.py
+Run from the ur_sim/ directory:  python tune_wrist_cam.py
 
 The xyz/quat shown are exactly what go into <body name="..." pos="..." quat="...">
 in gripper/robotiq-2f85.xml — body_pos / body_quat are stored relative to the

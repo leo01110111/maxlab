@@ -23,11 +23,16 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
+# Resolved relative to this file (not the process cwd) so the package works
+# whether it's run in-place (`cd ur_sim && python test_viz.py`) or installed and
+# imported from anywhere (`import ur_sim`).
+ASSET_DIR = Path(__file__).resolve().parent
+
 # UR7e arm MJCF. Path keeps the legacy "ur5e" name (see module docstring); the
 # physics in that file is being changed to a UR7e.
-UR7E_PATH = "universal_robots_ur5e/ur5e.xml"
-ROBOTIQ_PATH = "gripper/robotiq-2f85.xml"
-ARDUCAM_PATH = "gripper/arducam_ov9782.xml"
+UR7E_PATH = str(ASSET_DIR / "universal_robots_ur5e" / "ur5e.xml")
+ROBOTIQ_PATH = str(ASSET_DIR / "gripper" / "robotiq-2f85.xml")
+ARDUCAM_PATH = str(ASSET_DIR / "gripper" / "arducam_ov9782.xml")
 
 # Wrist camera (one per arm): an ArduCam OV9782 board on a printed bracket that
 # saddles the Robotiq base, looking over the fingers at the grasp. The bracket
@@ -92,7 +97,7 @@ GRIPPER_OPEN, GRIPPER_CLOSED = 0.0, 255.0
 BLOCK_HALF = 0.025                                   # 5 cm cube
 BLOCK_REST_Z = BOARD_TOP + BLOCK_HALF
 BLOCK_INIT_POS = (0.45, 0.0, BLOCK_REST_Z)
-BLOCK_RGBA = [0.85, 0.15, 0.15, 1]
+BLOCK_RGBA = [0.15, 0.75, 0.20, 1]
 LIFT_SUCCESS_H = 0.05                                # meters above rest to count as a pick
 
 # --------------------------------------------------------------- cardboard tray
@@ -165,7 +170,7 @@ def build_spec() -> mujoco.MjSpec:
                      rgb1=[0.8, 0.8, 0.78], rgb2=[0.8, 0.8, 0.78], width=512, height=3072)
 
     spec.add_texture(name="carpet", type=mujoco.mjtTexture.mjTEXTURE_2D,
-                     file="universal_robots_ur5e/assets/carpet.png")
+                     file=str(ASSET_DIR / "universal_robots_ur5e" / "assets" / "carpet.png"))
     grid_mat = spec.add_material(name="grid", rgba=[1, 1, 1, 1], reflectance=0.0,
                                   texrepeat=[10, 10], texuniform=True)
     grid_mat.textures[mujoco.mjtTextureRole.mjTEXROLE_RGB] = "carpet"

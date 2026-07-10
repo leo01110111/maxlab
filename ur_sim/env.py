@@ -25,10 +25,20 @@ from gymnasium.spaces import Box, Dict
 import mujoco
 import mujoco.viewer
 
-from build_urtable import (
-    build_model, set_initial_pose, block_height, pick_success, BLOCK_REST_Z,
-    apply_initial_view,
-)
+try:
+    # Installed-package form: `import ur_sim` -> this file loads as
+    # `ur_sim.env`, which has a parent package, so the relative import resolves.
+    from .build_urtable import (
+        build_model, set_initial_pose, block_height, pick_success, BLOCK_REST_Z,
+        apply_initial_view,
+    )
+except ImportError:
+    # Dev/script form: run directly from inside ur_sim/ (e.g. `python test_env.py`),
+    # where this file has no parent package and ur_sim/ is on sys.path instead.
+    from build_urtable import (
+        build_model, set_initial_pose, block_height, pick_success, BLOCK_REST_Z,
+        apply_initial_view,
+    )
 
 class SimBimanualUR7eEnv(gym.Env):
     """Two 6-DOF UR7e arms each with a Robotiq 2F-85 gripper (14 actuators:

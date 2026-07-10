@@ -7,3 +7,17 @@ dependencies = [
     "mujoco>=3.9.0",
     "opencv-python>=4.13.0.92",
 ]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# Import name is "ur_sim" (the existing directory); distribution name stays
+# "mujoco-musings" above -- that's normal (e.g. "opencv-python" -> "cv2").
+[tool.setuptools.packages.find]
+include = ["ur_sim*"]
+
+# Non-.py assets (robot/gripper MJCF, meshes, textures) that build_urtable.py
+# loads at runtime via paths resolved next to this file (see ASSET_DIR).
+[tool.setuptools.package-data]
+ur_sim = ["**/*.xml", "**/*.stl", "**/*.obj", "**/*.mtl", "**/*.png"]
