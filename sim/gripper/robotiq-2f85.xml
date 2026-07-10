@@ -17,7 +17,6 @@
     <mesh class="2f85" file="pad.stl"/>
     <mesh class="2f85" file="silicone_pad.stl"/>
     <mesh class="2f85" file="spring_link.stl"/>
-    <mesh class="2f85" file="arducam_ov9782.stl"/>
     <mesh class="2f85" file="wrist_cam_mount.stl"/>
   </asset>
 
@@ -68,6 +67,8 @@
         <geom class="visual" mesh="base" material="black"/>
         <geom class="collision" mesh="base"/>
         <site name="pinch" pos="0 0 0.145" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
+        <site name="base_hole_left" pos="-0.027 -0.006 0.0238" type="sphere" group="5" rgba="0.9 0.2 0.2 1" size="0.003"/>
+        <site name="base_hole_right" pos="-0.027 0.006 0.0238" type="sphere" group="5" rgba="0.9 0.2 0.2 1" size="0.003"/>
         <!-- ===================== WRIST CAMERA — TUNE HERE ====================
              ArduCam OV9782 on a printed bracket that saddles the Robotiq base,
              looking over the fingers at the grasp.  Two nested frames, two
@@ -82,14 +83,20 @@
                 camera (which views along -z) look along +z too — so +z is "where
                 the camera looks".
              All geoms are massless / non-colliding so they never perturb dynamics. -->
-        <body name="wrist_mount" pos="0.04 0 0.05" quat="0.6682 0.2312 0.2312 -0.6682">
+        <body name="wrist_mount" pos="-0.027 0 0.0213" quat="0.707107 0 0 -0.707107">
           <geom name="wrist_mount" type="mesh" mesh="wrist_cam_mount" contype="0"
                 conaffinity="0" mass="0" rgba="0.45 0.62 0.78 1"/>
-          <body name="wrist_cam" pos="0 0 0.05" quat="1 0 0 0">
-            <geom name="wrist_cam" type="mesh" mesh="arducam_ov9782" contype="0"
-                  conaffinity="0" mass="0" rgba="0.12 0.12 0.13 1"/>
-            <camera name="wrist" quat="0 1 0 0" fovy="92" resolution="1280 800"/>
-          </body>
+          <site name="wrist_mount_hole_left" pos="-0.006 0 0.0025" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.003"/>
+          <site name="wrist_mount_hole_right" pos="0.006 0 0.0025" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.003"/>
+          <!-- Where the arducam_ov9782 module attaches (via MjSpec attach_body in
+               build_urtable.py), computed by a 4-point best-fit (Kabsch) between
+               this bracket's 4 camera bolt holes and the arducam's 4 bolt holes;
+               RMS residual ~0.02mm. -->
+          <site name="cam_attach" pos="0 -0.054 -0.04" quat="0.71441 -0.11985 -0.11379 -0.67993" group="5" rgba="0.9 0.6 0.1 0.5" size="0.002"/>
+          <site name="wrist_mount_cam_hole_1" pos="-0.01399 -0.042505 -0.049135" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.002"/>
+          <site name="wrist_mount_cam_hole_2" pos="0.01401 -0.069 -0.04001" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.002"/>
+          <site name="wrist_mount_cam_hole_3" pos="0.014 -0.04251 -0.04913" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.002"/>
+          <site name="wrist_mount_cam_hole_4" pos="-0.01399 -0.06898 -0.04002" type="sphere" group="5" rgba="0.2 0.9 0.2 1" size="0.002"/>
         </body>
         <!-- Right-hand side 4-bar linkage -->
         <body name="right_driver" pos="0 0.0306011 0.054904">

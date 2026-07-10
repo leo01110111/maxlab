@@ -27,35 +27,14 @@ import mujoco
 # physics in that file is being changed to a UR7e.
 UR7E_PATH = "universal_robots_ur5e/ur5e.xml"
 ROBOTIQ_PATH = "gripper/robotiq-2f85.xml"
+ARDUCAM_PATH = "gripper/arducam_ov9782.xml"
 
-# Wrist camera hardware (one per arm): an ArduCam OV9782 board bolted to a printed
-# bracket that saddles the Robotiq base, looking forward over the fingers at the
-# grasp. STLs are in mm (scaled 0.001) and live in the gripper assets dir so they
-# travel with the gripper subtree on attach.
-WRIST_MOUNT_MESH = "wrist_cam_mount.stl"     # resolved via the gripper meshdir (assets/)
-WRIST_CAM_MESH = "arducam_ov9782.stl"
-# OV9782 global-shutter color module specs (true sensor specs).
-WRIST_CAM_FOVY = 92.0                         # diagonal/vertical FOV of the fisheye lens (deg)
-WRIST_CAM_RES = (1280, 800)                   # native resolution (w, h)
-# Placement in the Robotiq base_mount frame (+z = approach/finger direction).
-# The base body has quat=[1,0,0,-1] (−90° Z rotation) so its back face (y=+36mm
-# in base.stl) maps to +X in base_mount frame.  That is the face shown in the
-# photo where the bracket attaches (4 cam_bolt_* sites on that face).
-# The lens (cam mesh +z) aims toward the pinch point over the fingers.
-WRIST_MOUNT_POS = (0.04, 0.0, 0.05)           # +X = back face of Robotiq body
-WRIST_LENS_DIR = (-0.45, 0.0, 0.9)            # lens points inward (-X) and up toward grasp
-WRIST_CAM_LOCAL_POS = (0.0, -0.0045, 0.0085)  # cam board on the bracket's scoop face
-
-# Robotiq-attachment saddle holes in the wrist_cam_mount.stl frame.
-# These are on the CURVED SADDLE WALLS (z≈0mm, NOT the flat plate at z=-40mm).
-# Positions are analytically derived: R_mount @ (robotiq_cam_bolt_bm - WRIST_MOUNT_POS),
-# confirmed by vertex-density checks (98/92 verts within 5mm of top pair).
-# The mount only has 2 saddle holes mating with the Robotiq top bolt pair;
-# the "bot" sites below are the closest structural holes found (~15.4mm).
-MOUNT_HOLE_TOP_R = ( 0.0089, -0.00657,  0.00027)  # saddle hole, aligns with cam_bolt_top_r
-MOUNT_HOLE_TOP_L = (-0.0089, -0.00657,  0.00027)  # saddle hole, aligns with cam_bolt_top_l
-MOUNT_HOLE_BOT_R = ( 0.0154,  0.00062,  0.00250)  # structural hole, nearest to cam_bolt_bot_r
-MOUNT_HOLE_BOT_L = (-0.0158,  0.00028,  0.00249)  # structural hole, nearest to cam_bolt_bot_l
+# Wrist camera (one per arm): an ArduCam OV9782 board on a printed bracket that
+# saddles the Robotiq base, looking over the fingers at the grasp. The bracket
+# ("wrist_mount") is defined directly in the Robotiq XML; the camera module is
+# a separate MjSpec attached onto the bracket's "cam_attach" site (see
+# _arm_with_gripper below). Tune the bracket pose with tune_wrist_cam.py. See
+# gripper/robotiq-2f85.xml and gripper/arducam_ov9782.xml.
 
 # ---------------------------------------------------------------- measurements
 TABLE_H = 0.76          # aluminum frame top height
@@ -83,8 +62,8 @@ ARM_LEFT = (-(HALF_LEN - ARM_END_DIST), ARM_Y)          # (-0.7425, -0.005)
 
 # Single overhead camera (Intel RealSense D435): centered along the table length
 # on the front edge, elevated, tilted slightly down toward the work surface.
-CAM_POS = (0.0, -HALF_W + 0.05, BOARD_TOP + 0.35)   # centered in x, front edge, elevated
-CAM_DOWN_TILT = np.deg2rad(20.0)                    # slight downward tilt from horizontal
+CAM_POS = (0.0, -HALF_W + 0.05, BOARD_TOP + 0.675)  # centered in x, front edge, 67.5cm above table top
+CAM_DOWN_TILT = np.deg2rad(30.0)                    # 30 deg downward tilt from the table top (horizontal)
 CAM_TARGET = (CAM_POS[0],                           # look forward (+y, into the table)
               CAM_POS[1] + np.cos(CAM_DOWN_TILT),   # and slightly down
               CAM_POS[2] - np.sin(CAM_DOWN_TILT))
@@ -116,9 +95,18 @@ BLOCK_INIT_POS = (0.45, 0.0, BLOCK_REST_Z)
 BLOCK_RGBA = [0.85, 0.15, 0.15, 1]
 LIFT_SUCCESS_H = 0.05                                # meters above rest to count as a pick
 
+# --------------------------------------------------------------- cardboard tray
+# Open-top box (corrugated cardboard tray) sitting on the board, clear of the
+# block's pick site and both arm bases.
+BOX_OUTER = 0.16                                     # outer footprint, square
+BOX_WALL_T = 0.006
+BOX_WALL_H = 0.035
+BOX_FLOOR_T = 0.004
+BOX_INIT_POS = (-0.35, 0.25, BOARD_TOP + BOX_FLOOR_T / 2)
+BOX_RGBA = [0.72, 0.53, 0.34, 1]
+
 # colors
 COL_ALU = [0.62, 0.64, 0.66, 1]
-COL_BOARD = [0.08, 0.08, 0.09, 1]
 COL_PLATE = [0.20, 0.42, 0.78, 1]
 COL_LEG = [0.12, 0.13, 0.15, 1]
 
@@ -140,74 +128,17 @@ def _lookat_quat(cam_pos, target):
     return quat
 
 
-def _wrist_mount_quat(lens_dir, anchor) -> np.ndarray:
-    """Quaternion orienting the wrist bracket so the camera mesh's +z (the lens
-    optical axis) points along lens_dir, and the bracket's base plate (the mesh's
-    -y side) tucks toward `anchor` (the direction from the mount back to the
-    gripper body). Built from an orthonormal frame: +z -> lens, -y -> the part of
-    anchor perpendicular to the lens, +x -> their cross."""
-    f = np.asarray(lens_dir, float)
-    f /= np.linalg.norm(f)
-    a = np.asarray(anchor, float)
-    d = a - f * (a @ f)                          # image of mesh -y (drop the lens component)
-    d = d / np.linalg.norm(d) if np.linalg.norm(d) > 1e-6 else np.array([1.0, 0, 0])
-    colx = np.cross(-d, f)
-    colx /= np.linalg.norm(colx)
-    mat = np.column_stack([colx, -d, f]).flatten()   # columns = images of +x,+y,+z
-    quat = np.zeros(4)
-    mujoco.mju_mat2Quat(quat, mat)
-    return quat
-
-
-def _attach_wrist_camera(gripper: mujoco.MjSpec) -> None:
-    """Add the printed bracket + ArduCam OV9782 + a MuJoCo camera onto the gripper
-    base_mount, in place. Called before the gripper is attached so it inherits the
-    per-arm prefix (final names like 'left_grip_wrist'). Meshes are visual-only
-    (no contacts) and massless so they don't perturb the arm dynamics."""
-    gripper.add_mesh(name="wrist_cam_mount", file=WRIST_MOUNT_MESH, scale=[0.001] * 3)
-    gripper.add_mesh(name="arducam", file=WRIST_CAM_MESH, scale=[0.001] * 3)
-
-    base_mount = gripper.body("base_mount")
-    # The base plate should tuck back toward the gripper body, i.e. opposite the
-    # mount's lateral offset from the base_mount axis.
-    anchor = (-WRIST_MOUNT_POS[0], -WRIST_MOUNT_POS[1], 0.0)
-    mount = base_mount.add_body(name="wrist_mount", pos=list(WRIST_MOUNT_POS),
-                                quat=list(_wrist_mount_quat(WRIST_LENS_DIR, anchor)))
-    g = mount.add_geom(name="wrist_mount", type=mujoco.mjtGeom.mjGEOM_MESH,
-                       meshname="wrist_cam_mount", rgba=[0.45, 0.62, 0.78, 1])
-    g.contype, g.conaffinity, g.mass = 0, 0, 0.04
-
-    # Bolt-hole sites on the mount base plate; paired with cam_bolt_* sites on the
-    # Robotiq base body for verifying / correcting alignment.
-    for sname, spos in (("mnt_hole_top_r", MOUNT_HOLE_TOP_R),
-                        ("mnt_hole_top_l", MOUNT_HOLE_TOP_L),
-                        ("mnt_hole_bot_r", MOUNT_HOLE_BOT_R),
-                        ("mnt_hole_bot_l", MOUNT_HOLE_BOT_L)):
-        s = mount.add_site(name=sname, type=mujoco.mjtGeom.mjGEOM_SPHERE,
-                           size=[0.003, 0, 0], rgba=[0, 1, 0, 1], group=5)
-        s.pos = list(spos)
-
-    # Camera board sits on the bracket's scoop face; the cam mesh's +z is the lens.
-    cam_body = mount.add_body(name="wrist_cam", pos=list(WRIST_CAM_LOCAL_POS))
-    g2 = cam_body.add_geom(name="wrist_cam", type=mujoco.mjtGeom.mjGEOM_MESH,
-                           meshname="arducam", rgba=[0.12, 0.12, 0.13, 1])
-    g2.contype, g2.conaffinity, g2.mass = 0, 0, 0.01
-
-    # MuJoCo cameras look down their own -z, so flip 180 about x to look along +z.
-    flip = np.zeros(4)
-    mujoco.mju_euler2Quat(flip, np.deg2rad([180.0, 0.0, 0.0]), "XYZ")
-    cam = cam_body.add_camera(name="wrist", quat=list(flip), fovy=WRIST_CAM_FOVY)
-    cam.resolution = list(WRIST_CAM_RES)
-
-
 def _arm_with_gripper() -> mujoco.MjSpec:
     """Load a UR7e and bolt a Robotiq 2F-85 onto its wrist attachment site. The
-    gripper's coupling (equality constraints + tendon) and its single actuator
-    come along with the attach, prefixed 'grip_'. A wrist camera + bracket is
-    mounted on the gripper first so it inherits the same prefix."""
+    gripper's coupling (equality constraints + tendon), its single actuator, and
+    its wrist camera all come along with the attach, prefixed 'grip_' (final camera
+    names: 'left_grip_wrist' / 'right_grip_wrist')."""
     arm = mujoco.MjSpec.from_file(UR7E_PATH)
     gripper = mujoco.MjSpec.from_file(ROBOTIQ_PATH)
-    _attach_wrist_camera(gripper)
+    cam = mujoco.MjSpec.from_file(ARDUCAM_PATH)
+    # Empty prefix so the camera's names stay "wrist_cam"/"wrist" through this
+    # attach, matching what the grip_/left_/right_ prefixes below expect.
+    gripper.site("cam_attach").attach_body(cam.body("wrist_cam"), "", "")
     arm.site("attachment_site").attach_body(gripper.body("base_mount"), "grip_", "")
     return arm
 
@@ -220,18 +151,59 @@ def build_spec() -> mujoco.MjSpec:
     # smaller top-camera / policy renders too.
     spec.visual.global_.offwidth = 1280
     spec.visual.global_.offheight = 800
-    spec.visual.headlight.ambient = [0.6, 0.6, 0.6]
-    spec.visual.headlight.diffuse = [1.0, 1.0, 1.0]
+    spec.visual.headlight.ambient = [0.35, 0.35, 0.35]
+    spec.visual.headlight.diffuse = [0.6, 0.6, 0.6]
+    # Pin the model extent to the working area (table + arms), not the room's
+    # bounding box. znear is znear_ratio * extent (default ratio 0.01); left
+    # unpinned, the 6x6m floor/walls inflate extent to ~12m, pushing znear past
+    # 12cm and clipping the wrist-cam mount/arm links, which sit only a few cm
+    # from the lens.
+    spec.stat.extent = 1.5
 
-    spec.add_texture(name="grid", type=mujoco.mjtTexture.mjTEXTURE_2D,
-                     builtin=mujoco.mjtBuiltin.mjBUILTIN_CHECKER,
-                     rgb1=[0.2, 0.3, 0.4], rgb2=[0.1, 0.15, 0.2], width=300, height=300)
-    spec.add_material(name="grid", textures=["", "grid"], texrepeat=[8, 8], reflectance=0.1)
+    spec.add_texture(name="skybox", type=mujoco.mjtTexture.mjTEXTURE_SKYBOX,
+                     builtin=mujoco.mjtBuiltin.mjBUILTIN_FLAT,
+                     rgb1=[0.8, 0.8, 0.78], rgb2=[0.8, 0.8, 0.78], width=512, height=3072)
+
+    spec.add_texture(name="carpet", type=mujoco.mjtTexture.mjTEXTURE_2D,
+                     file="universal_robots_ur5e/assets/carpet.png")
+    grid_mat = spec.add_material(name="grid", rgba=[1, 1, 1, 1], reflectance=0.0,
+                                  texrepeat=[10, 10], texuniform=True)
+    grid_mat.textures[mujoco.mjtTextureRole.mjTEXROLE_RGB] = "carpet"
+
+    spec.add_material(name="wallpaper", rgba=[0.96, 0.96, 0.94, 1], reflectance=0.05)
+
+    spec.add_texture(name="board_plastic", type=mujoco.mjtTexture.mjTEXTURE_2D,
+                     builtin=mujoco.mjtBuiltin.mjBUILTIN_FLAT, mark=mujoco.mjtMark.mjMARK_RANDOM,
+                     rgb1=[0, 0, 0], rgb2=[0, 0, 0], markrgb=[0.03, 0.03, 0.03], random=0.02,
+                     width=512, height=512)
+    board_mat = spec.add_material(name="board_plastic", texrepeat=[4, 4], texuniform=True,
+                                   specular=0.9, shininess=0.9, reflectance=0.2)
+    board_mat.textures[mujoco.mjtTextureRole.mjTEXROLE_RGB] = "board_plastic"
+
+    spec.add_texture(name="cardboard", type=mujoco.mjtTexture.mjTEXTURE_2D,
+                     builtin=mujoco.mjtBuiltin.mjBUILTIN_FLAT, mark=mujoco.mjtMark.mjMARK_RANDOM,
+                     rgb1=BOX_RGBA[:3], rgb2=BOX_RGBA[:3], markrgb=[0.55, 0.38, 0.22],
+                     random=0.08, width=256, height=256)
+    cardboard_mat = spec.add_material(name="cardboard", texrepeat=[2, 2], texuniform=True,
+                                       specular=0.05, shininess=0.05, reflectance=0.0)
+    cardboard_mat.textures[mujoco.mjtTextureRole.mjTEXROLE_RGB] = "cardboard"
 
     wb = spec.worldbody
     wb.add_light(pos=[0, 0, 4], dir=[0, 0, -1], type=mujoco.mjtLightType.mjLIGHT_DIRECTIONAL,
-                 diffuse=[0.6, 0.6, 0.6])
+                 diffuse=[0.35, 0.35, 0.35])
     wb.add_geom(name="floor", type=mujoco.mjtGeom.mjGEOM_PLANE, size=[3, 3, 0.05], material="grid")
+
+    # --- room walls: plain white wallpaper enclosing the floor --------------
+    ROOM_HALF = 3.0     # matches floor plane half-extent
+    WALL_H = 2.4         # typical room ceiling height
+    WALL_T = 0.05
+    for name, pos, size in (
+        ("wall_neg_x", [-ROOM_HALF, 0, WALL_H / 2], [WALL_T / 2, ROOM_HALF, WALL_H / 2]),
+        ("wall_pos_x", [ROOM_HALF, 0, WALL_H / 2], [WALL_T / 2, ROOM_HALF, WALL_H / 2]),
+        ("wall_neg_y", [0, -ROOM_HALF, WALL_H / 2], [ROOM_HALF, WALL_T / 2, WALL_H / 2]),
+        ("wall_pos_y", [0, ROOM_HALF, WALL_H / 2], [ROOM_HALF, WALL_T / 2, WALL_H / 2]),
+    ):
+        wb.add_geom(name=name, type=mujoco.mjtGeom.mjGEOM_BOX, pos=pos, size=size, material="wallpaper")
 
     # --- table: aluminum frame top + 4 legs ---------------------------------
     wb.add_geom(name="alu_top", type=mujoco.mjtGeom.mjGEOM_BOX,
@@ -267,7 +239,7 @@ def build_spec() -> mujoco.MjSpec:
     for name, (x0, x1), (y0, y1) in pieces:
         wb.add_geom(name=f"board_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
                     size=[(x1 - x0) / 2, (y1 - y0) / 2, BOARD_T / 2],
-                    pos=[(x0 + x1) / 2, (y0 + y1) / 2, board_z], rgba=COL_BOARD)
+                    pos=[(x0 + x1) / 2, (y0 + y1) / 2, board_z], material="board_plastic")
 
     # --- arms ----------------------------------------------------------------
     # The left base is yawed -90deg about z (clockwise viewed from above) so the
@@ -287,6 +259,23 @@ def build_spec() -> mujoco.MjSpec:
     block.add_geom(name="block", type=mujoco.mjtGeom.mjGEOM_BOX,
                    size=[BLOCK_HALF] * 3, rgba=BLOCK_RGBA,
                    mass=0.05, friction=[1.0, 0.01, 0.001])
+
+    # --- open-top cardboard tray (free joint) -------------------------------
+    box_half = BOX_OUTER / 2
+    box_in_half = box_half - BOX_WALL_T
+    box = wb.add_body(name="cardboard_box", pos=list(BOX_INIT_POS))
+    box.add_freejoint(name="cardboard_box_joint")
+    box.add_geom(name="cardboard_box_floor", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[box_half, box_half, BOX_FLOOR_T / 2], material="cardboard", mass=0.03)
+    wall_z = BOX_FLOOR_T / 2 + BOX_WALL_H / 2
+    for name, size, pos in (
+        ("neg_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [-box_in_half, 0, wall_z]),
+        ("pos_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [box_in_half, 0, wall_z]),
+        ("neg_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, -box_in_half, wall_z]),
+        ("pos_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, box_in_half, wall_z]),
+    ):
+        box.add_geom(name=f"cardboard_box_wall_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
+                    size=size, pos=pos, material="cardboard", mass=0.01)
 
     # --- camera (Intel RealSense D435) --------------------------------------
     quat = _lookat_quat(CAM_POS, CAM_TARGET)
@@ -391,6 +380,8 @@ def main() -> None:
     model, data = build_scene()
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
+        viewer.opt.frame = mujoco.mjtFrame.mjFRAME_SITE
+        viewer.opt.sitegroup[5] = True  # sites use group 5 (see robotiq-2f85.xml); off by default
         while viewer.is_running():
             step_start = time.time()
             mujoco.mj_step(model, data)
