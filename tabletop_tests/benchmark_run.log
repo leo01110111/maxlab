@@ -1,0 +1,7 @@
+
+=== full ===
+  low   (tilt>=45 roll>=270 @tilt 0)  n=110 left  8  right 17  either 23  bimanual 29
+  mid   (tilt>=45 roll>=270 @tilt 45)  n=110 left  9  right 22  either 27  bimanual 38
+  high  (tilt>=45 roll>=270 @tilt 45)  n=110 left  9  right 15  either 22  bimanual 41
+  TOTAL                                    n=330 left 26  right 54  either 72  bimanual 108
+  limiting factor: no reach 318, wrist flip 105, no IK 87, collision 70

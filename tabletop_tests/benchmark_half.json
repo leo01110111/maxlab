@@ -1,0 +1,2199 @@
+{
+  "frame": "scene frame of gantry_core.py: origin on the floor at the center of the exposed tabletop, +x right along the mount edge, +y away from the mount, +z up, meters; z absolute (board top = 0.775)",
+  "exposed": {
+    "length": 1.12,
+    "depth": 0.585
+  },
+  "grid": {
+    "x": [
+      -0.5,
+      -0.4,
+      -0.3,
+      -0.2,
+      -0.1,
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5
+    ],
+    "y": [
+      -0.142,
+      -0.042,
+      0.058,
+      0.158,
+      0.258
+    ],
+    "layers": {
+      "low": 0.05,
+      "mid": 0.2,
+      "high": 0.35
+    }
+  },
+  "requirements": {
+    "low": {
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    "mid": {
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    "high": {
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    }
+  },
+  "bimanual_tilt_min": 30.0,
+  "waypoints": [
+    {
+      "name": "low_x-500_d0150",
+      "pos": [
+        -0.5,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-400_d0150",
+      "pos": [
+        -0.4,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-300_d0150",
+      "pos": [
+        -0.3,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-200_d0150",
+      "pos": [
+        -0.2,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-100_d0150",
+      "pos": [
+        -0.1,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+000_d0150",
+      "pos": [
+        0.0,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+100_d0150",
+      "pos": [
+        0.1,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+200_d0150",
+      "pos": [
+        0.2,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+300_d0150",
+      "pos": [
+        0.3,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+400_d0150",
+      "pos": [
+        0.4,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+500_d0150",
+      "pos": [
+        0.5,
+        -0.142,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-500_d0250",
+      "pos": [
+        -0.5,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-400_d0250",
+      "pos": [
+        -0.4,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-300_d0250",
+      "pos": [
+        -0.3,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-200_d0250",
+      "pos": [
+        -0.2,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-100_d0250",
+      "pos": [
+        -0.1,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+000_d0250",
+      "pos": [
+        0.0,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+100_d0250",
+      "pos": [
+        0.1,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+200_d0250",
+      "pos": [
+        0.2,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+300_d0250",
+      "pos": [
+        0.3,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+400_d0250",
+      "pos": [
+        0.4,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+500_d0250",
+      "pos": [
+        0.5,
+        -0.042,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-500_d0350",
+      "pos": [
+        -0.5,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-400_d0350",
+      "pos": [
+        -0.4,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-300_d0350",
+      "pos": [
+        -0.3,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-200_d0350",
+      "pos": [
+        -0.2,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-100_d0350",
+      "pos": [
+        -0.1,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+000_d0350",
+      "pos": [
+        0.0,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+100_d0350",
+      "pos": [
+        0.1,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+200_d0350",
+      "pos": [
+        0.2,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+300_d0350",
+      "pos": [
+        0.3,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+400_d0350",
+      "pos": [
+        0.4,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+500_d0350",
+      "pos": [
+        0.5,
+        0.058,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-500_d0450",
+      "pos": [
+        -0.5,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-400_d0450",
+      "pos": [
+        -0.4,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-300_d0450",
+      "pos": [
+        -0.3,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-200_d0450",
+      "pos": [
+        -0.2,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-100_d0450",
+      "pos": [
+        -0.1,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+000_d0450",
+      "pos": [
+        0.0,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+100_d0450",
+      "pos": [
+        0.1,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+200_d0450",
+      "pos": [
+        0.2,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+300_d0450",
+      "pos": [
+        0.3,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+400_d0450",
+      "pos": [
+        0.4,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+500_d0450",
+      "pos": [
+        0.5,
+        0.158,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-500_d0550",
+      "pos": [
+        -0.5,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-400_d0550",
+      "pos": [
+        -0.4,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-300_d0550",
+      "pos": [
+        -0.3,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-200_d0550",
+      "pos": [
+        -0.2,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x-100_d0550",
+      "pos": [
+        -0.1,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+000_d0550",
+      "pos": [
+        0.0,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+100_d0550",
+      "pos": [
+        0.1,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+200_d0550",
+      "pos": [
+        0.2,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+300_d0550",
+      "pos": [
+        0.3,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+400_d0550",
+      "pos": [
+        0.4,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "low_x+500_d0550",
+      "pos": [
+        0.5,
+        0.258,
+        0.825
+      ],
+      "layer": "low",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 0.0
+    },
+    {
+      "name": "mid_x-500_d0150",
+      "pos": [
+        -0.5,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-400_d0150",
+      "pos": [
+        -0.4,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-300_d0150",
+      "pos": [
+        -0.3,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-200_d0150",
+      "pos": [
+        -0.2,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-100_d0150",
+      "pos": [
+        -0.1,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+000_d0150",
+      "pos": [
+        0.0,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+100_d0150",
+      "pos": [
+        0.1,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+200_d0150",
+      "pos": [
+        0.2,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+300_d0150",
+      "pos": [
+        0.3,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+400_d0150",
+      "pos": [
+        0.4,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+500_d0150",
+      "pos": [
+        0.5,
+        -0.142,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-500_d0250",
+      "pos": [
+        -0.5,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-400_d0250",
+      "pos": [
+        -0.4,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-300_d0250",
+      "pos": [
+        -0.3,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-200_d0250",
+      "pos": [
+        -0.2,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-100_d0250",
+      "pos": [
+        -0.1,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+000_d0250",
+      "pos": [
+        0.0,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+100_d0250",
+      "pos": [
+        0.1,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+200_d0250",
+      "pos": [
+        0.2,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+300_d0250",
+      "pos": [
+        0.3,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+400_d0250",
+      "pos": [
+        0.4,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+500_d0250",
+      "pos": [
+        0.5,
+        -0.042,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-500_d0350",
+      "pos": [
+        -0.5,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-400_d0350",
+      "pos": [
+        -0.4,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-300_d0350",
+      "pos": [
+        -0.3,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-200_d0350",
+      "pos": [
+        -0.2,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-100_d0350",
+      "pos": [
+        -0.1,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+000_d0350",
+      "pos": [
+        0.0,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+100_d0350",
+      "pos": [
+        0.1,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+200_d0350",
+      "pos": [
+        0.2,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+300_d0350",
+      "pos": [
+        0.3,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+400_d0350",
+      "pos": [
+        0.4,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+500_d0350",
+      "pos": [
+        0.5,
+        0.058,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-500_d0450",
+      "pos": [
+        -0.5,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-400_d0450",
+      "pos": [
+        -0.4,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-300_d0450",
+      "pos": [
+        -0.3,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-200_d0450",
+      "pos": [
+        -0.2,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-100_d0450",
+      "pos": [
+        -0.1,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+000_d0450",
+      "pos": [
+        0.0,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+100_d0450",
+      "pos": [
+        0.1,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+200_d0450",
+      "pos": [
+        0.2,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+300_d0450",
+      "pos": [
+        0.3,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+400_d0450",
+      "pos": [
+        0.4,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+500_d0450",
+      "pos": [
+        0.5,
+        0.158,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-500_d0550",
+      "pos": [
+        -0.5,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-400_d0550",
+      "pos": [
+        -0.4,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-300_d0550",
+      "pos": [
+        -0.3,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-200_d0550",
+      "pos": [
+        -0.2,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x-100_d0550",
+      "pos": [
+        -0.1,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+000_d0550",
+      "pos": [
+        0.0,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+100_d0550",
+      "pos": [
+        0.1,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+200_d0550",
+      "pos": [
+        0.2,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+300_d0550",
+      "pos": [
+        0.3,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+400_d0550",
+      "pos": [
+        0.4,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "mid_x+500_d0550",
+      "pos": [
+        0.5,
+        0.258,
+        0.975
+      ],
+      "layer": "mid",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-500_d0150",
+      "pos": [
+        -0.5,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-400_d0150",
+      "pos": [
+        -0.4,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-300_d0150",
+      "pos": [
+        -0.3,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-200_d0150",
+      "pos": [
+        -0.2,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-100_d0150",
+      "pos": [
+        -0.1,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+000_d0150",
+      "pos": [
+        0.0,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+100_d0150",
+      "pos": [
+        0.1,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+200_d0150",
+      "pos": [
+        0.2,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+300_d0150",
+      "pos": [
+        0.3,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+400_d0150",
+      "pos": [
+        0.4,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+500_d0150",
+      "pos": [
+        0.5,
+        -0.142,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-500_d0250",
+      "pos": [
+        -0.5,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-400_d0250",
+      "pos": [
+        -0.4,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-300_d0250",
+      "pos": [
+        -0.3,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-200_d0250",
+      "pos": [
+        -0.2,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-100_d0250",
+      "pos": [
+        -0.1,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+000_d0250",
+      "pos": [
+        0.0,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+100_d0250",
+      "pos": [
+        0.1,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+200_d0250",
+      "pos": [
+        0.2,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+300_d0250",
+      "pos": [
+        0.3,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+400_d0250",
+      "pos": [
+        0.4,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+500_d0250",
+      "pos": [
+        0.5,
+        -0.042,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-500_d0350",
+      "pos": [
+        -0.5,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-400_d0350",
+      "pos": [
+        -0.4,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-300_d0350",
+      "pos": [
+        -0.3,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-200_d0350",
+      "pos": [
+        -0.2,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-100_d0350",
+      "pos": [
+        -0.1,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+000_d0350",
+      "pos": [
+        0.0,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+100_d0350",
+      "pos": [
+        0.1,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+200_d0350",
+      "pos": [
+        0.2,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+300_d0350",
+      "pos": [
+        0.3,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+400_d0350",
+      "pos": [
+        0.4,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+500_d0350",
+      "pos": [
+        0.5,
+        0.058,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-500_d0450",
+      "pos": [
+        -0.5,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-400_d0450",
+      "pos": [
+        -0.4,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-300_d0450",
+      "pos": [
+        -0.3,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-200_d0450",
+      "pos": [
+        -0.2,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-100_d0450",
+      "pos": [
+        -0.1,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+000_d0450",
+      "pos": [
+        0.0,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+100_d0450",
+      "pos": [
+        0.1,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+200_d0450",
+      "pos": [
+        0.2,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+300_d0450",
+      "pos": [
+        0.3,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+400_d0450",
+      "pos": [
+        0.4,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+500_d0450",
+      "pos": [
+        0.5,
+        0.158,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-500_d0550",
+      "pos": [
+        -0.5,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-400_d0550",
+      "pos": [
+        -0.4,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-300_d0550",
+      "pos": [
+        -0.3,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-200_d0550",
+      "pos": [
+        -0.2,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x-100_d0550",
+      "pos": [
+        -0.1,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+000_d0550",
+      "pos": [
+        0.0,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+100_d0550",
+      "pos": [
+        0.1,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+200_d0550",
+      "pos": [
+        0.2,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+300_d0550",
+      "pos": [
+        0.3,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+400_d0550",
+      "pos": [
+        0.4,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    },
+    {
+      "name": "high_x+500_d0550",
+      "pos": [
+        0.5,
+        0.258,
+        1.125
+      ],
+      "layer": "high",
+      "separation": 0.35,
+      "tilt_min": 45.0,
+      "roll_min": 270.0,
+      "roll_tilt": 45.0
+    }
+  ]
+}

@@ -1,0 +1,346 @@
+
+Bimanual waypoint test -- both arms, props removed, implicitfast integrator
+PASS = both arms reach it, touch nothing on the way, and hold it parked
+
+waypoint                        full          half
+--------------------------------------------------
+low_x-500_d0150                 PASS          PASS
+low_x-400_d0150                 PASS          PASS
+low_x-300_d0150                 PASS          PASS
+low_x-200_d0150                 PASS          PASS
+low_x-100_d0150                 PASS          PASS
+low_x+000_d0150                 PASS          PASS
+low_x+100_d0150                 PASS          PASS
+low_x+200_d0150                 PASS          PASS
+low_x+300_d0150                 PASS          PASS
+low_x+400_d0150                 PASS          PASS
+low_x+500_d0150                 PASS          PASS
+low_x-500_d0250                droop         droop
+low_x-400_d0250                 PASS          PASS
+low_x-300_d0250                 PASS          PASS
+low_x-200_d0250                 PASS          PASS
+low_x-100_d0250                 PASS          PASS
+low_x+000_d0250                 PASS          PASS
+low_x+100_d0250                 PASS          PASS
+low_x+200_d0250                 PASS          PASS
+low_x+300_d0250                 PASS          PASS
+low_x+400_d0250                 PASS          PASS
+low_x+500_d0250                droop         droop
+low_x-500_d0350                droop         droop
+low_x-400_d0350                 PASS          PASS
+low_x-300_d0350                 PASS          PASS
+low_x-200_d0350                 PASS          PASS
+low_x-100_d0350                 PASS          PASS
+low_x+000_d0350                 PASS          PASS
+low_x+100_d0350                 PASS          PASS
+low_x+200_d0350                 PASS          PASS
+low_x+300_d0350                 PASS          PASS
+low_x+400_d0350                 PASS          PASS
+low_x+500_d0350                droop         droop
+low_x-500_d0450                droop         droop
+low_x-400_d0450                droop         droop
+low_x-300_d0450                droop         droop
+low_x-200_d0450                 PASS          PASS
+low_x-100_d0450                 PASS          PASS
+low_x+000_d0450                 PASS          PASS
+low_x+100_d0450                 PASS          PASS
+low_x+200_d0450                 PASS          PASS
+low_x+300_d0450                droop         droop
+low_x+400_d0450                droop         droop
+low_x+500_d0450                droop         droop
+low_x-500_d0550            collision     collision
+low_x-400_d0550                droop         droop
+low_x-300_d0550                droop         droop
+low_x-200_d0550                droop         droop
+low_x-100_d0550                droop         droop
+low_x+000_d0550                 PASS          PASS
+low_x+100_d0550                droop         droop
+low_x+200_d0550                droop         droop
+low_x+300_d0550                droop         droop
+low_x+400_d0550                droop         droop
+low_x+500_d0550            collision     collision
+low_x-500_d0650                no IK             -
+low_x-400_d0650                no IK             -
+low_x-300_d0650                droop             -
+low_x-200_d0650                droop             -
+low_x-100_d0650                droop             -
+low_x+000_d0650                droop             -
+low_x+100_d0650                droop             -
+low_x+200_d0650                droop             -
+low_x+300_d0650                droop             -
+low_x+400_d0650                no IK             -
+low_x+500_d0650                no IK             -
+low_x-500_d0750                no IK             -
+low_x-400_d0750                no IK             -
+low_x-300_d0750                no IK             -
+low_x-200_d0750                no IK             -
+low_x-100_d0750                droop             -
+low_x+000_d0750                droop             -
+low_x+100_d0750                droop             -
+low_x+200_d0750                no IK             -
+low_x+300_d0750                no IK             -
+low_x+400_d0750                no IK             -
+low_x+500_d0750                no IK             -
+low_x-500_d0850                no IK             -
+low_x-400_d0850                no IK             -
+low_x-300_d0850                no IK             -
+low_x-200_d0850                no IK             -
+low_x-100_d0850                no IK             -
+low_x+000_d0850                no IK             -
+low_x+100_d0850                no IK             -
+low_x+200_d0850                no IK             -
+low_x+300_d0850                no IK             -
+low_x+400_d0850                no IK             -
+low_x+500_d0850                no IK             -
+low_x-500_d0950                no IK             -
+low_x-400_d0950                no IK             -
+low_x-300_d0950                no IK             -
+low_x-200_d0950                no IK             -
+low_x-100_d0950                no IK             -
+low_x+000_d0950                no IK             -
+low_x+100_d0950                no IK             -
+low_x+200_d0950                no IK             -
+low_x+300_d0950                no IK             -
+low_x+400_d0950                no IK             -
+low_x+500_d0950                no IK             -
+low_x-500_d1050                no IK             -
+low_x-400_d1050                no IK             -
+low_x-300_d1050                no IK             -
+low_x-200_d1050                no IK             -
+low_x-100_d1050                no IK             -
+low_x+000_d1050                no IK             -
+low_x+100_d1050                no IK             -
+low_x+200_d1050                no IK             -
+low_x+300_d1050                no IK             -
+low_x+400_d1050                no IK             -
+low_x+500_d1050                no IK             -
+mid_x-500_d0150                 PASS          PASS
+mid_x-400_d0150                 PASS          PASS
+mid_x-300_d0150                 PASS          PASS
+mid_x-200_d0150                 PASS          PASS
+mid_x-100_d0150                 PASS          PASS
+mid_x+000_d0150                 PASS          PASS
+mid_x+100_d0150                 PASS          PASS
+mid_x+200_d0150                 PASS          PASS
+mid_x+300_d0150                 PASS          PASS
+mid_x+400_d0150                 PASS          PASS
+mid_x+500_d0150                 PASS          PASS
+mid_x-500_d0250                 PASS          PASS
+mid_x-400_d0250                 PASS          PASS
+mid_x-300_d0250                 PASS          PASS
+mid_x-200_d0250                 PASS          PASS
+mid_x-100_d0250                 PASS          PASS
+mid_x+000_d0250                 PASS          PASS
+mid_x+100_d0250                 PASS          PASS
+mid_x+200_d0250                 PASS          PASS
+mid_x+300_d0250                 PASS          PASS
+mid_x+400_d0250                 PASS          PASS
+mid_x+500_d0250                 PASS          PASS
+mid_x-500_d0350                droop         droop
+mid_x-400_d0350                 PASS          PASS
+mid_x-300_d0350                 PASS          PASS
+mid_x-200_d0350                 PASS          PASS
+mid_x-100_d0350                 PASS          PASS
+mid_x+000_d0350                 PASS          PASS
+mid_x+100_d0350                 PASS          PASS
+mid_x+200_d0350                 PASS          PASS
+mid_x+300_d0350                 PASS          PASS
+mid_x+400_d0350                 PASS          PASS
+mid_x+500_d0350                droop         droop
+mid_x-500_d0450                droop         droop
+mid_x-400_d0450                droop         droop
+mid_x-300_d0450                 PASS          PASS
+mid_x-200_d0450                 PASS          PASS
+mid_x-100_d0450                 PASS          PASS
+mid_x+000_d0450                 PASS          PASS
+mid_x+100_d0450                 PASS          PASS
+mid_x+200_d0450                 PASS          PASS
+mid_x+300_d0450                 PASS          PASS
+mid_x+400_d0450                droop         droop
+mid_x+500_d0450                droop         droop
+mid_x-500_d0550                droop         droop
+mid_x-400_d0550                droop         droop
+mid_x-300_d0550                droop         droop
+mid_x-200_d0550                droop         droop
+mid_x-100_d0550                 PASS          PASS
+mid_x+000_d0550                 PASS          PASS
+mid_x+100_d0550                 PASS          PASS
+mid_x+200_d0550                droop         droop
+mid_x+300_d0550                droop         droop
+mid_x+400_d0550                droop         droop
+mid_x+500_d0550                droop         droop
+mid_x-500_d0650                no IK             -
+mid_x-400_d0650                droop             -
+mid_x-300_d0650                droop             -
+mid_x-200_d0650                droop             -
+mid_x-100_d0650                droop             -
+mid_x+000_d0650                droop             -
+mid_x+100_d0650                droop             -
+mid_x+200_d0650                droop             -
+mid_x+300_d0650                droop             -
+mid_x+400_d0650                droop             -
+mid_x+500_d0650                no IK             -
+mid_x-500_d0750                no IK             -
+mid_x-400_d0750                no IK             -
+mid_x-300_d0750                no IK             -
+mid_x-200_d0750                droop             -
+mid_x-100_d0750                droop             -
+mid_x+000_d0750                droop             -
+mid_x+100_d0750                droop             -
+mid_x+200_d0750                droop             -
+mid_x+300_d0750                no IK             -
+mid_x+400_d0750                no IK             -
+mid_x+500_d0750                no IK             -
+mid_x-500_d0850                no IK             -
+mid_x-400_d0850                no IK             -
+mid_x-300_d0850                no IK             -
+mid_x-200_d0850                no IK             -
+mid_x-100_d0850                no IK             -
+mid_x+000_d0850                no IK             -
+mid_x+100_d0850                no IK             -
+mid_x+200_d0850                no IK             -
+mid_x+300_d0850                no IK             -
+mid_x+400_d0850                no IK             -
+mid_x+500_d0850                no IK             -
+mid_x-500_d0950                no IK             -
+mid_x-400_d0950                no IK             -
+mid_x-300_d0950                no IK             -
+mid_x-200_d0950                no IK             -
+mid_x-100_d0950                no IK             -
+mid_x+000_d0950                no IK             -
+mid_x+100_d0950                no IK             -
+mid_x+200_d0950                no IK             -
+mid_x+300_d0950                no IK             -
+mid_x+400_d0950                no IK             -
+mid_x+500_d0950                no IK             -
+mid_x-500_d1050                no IK             -
+mid_x-400_d1050                no IK             -
+mid_x-300_d1050                no IK             -
+mid_x-200_d1050                no IK             -
+mid_x-100_d1050                no IK             -
+mid_x+000_d1050                no IK             -
+mid_x+100_d1050                no IK             -
+mid_x+200_d1050                no IK             -
+mid_x+300_d1050                no IK             -
+mid_x+400_d1050                no IK             -
+mid_x+500_d1050                no IK             -
+high_x-500_d0150           collision     collision
+high_x-400_d0150           collision     collision
+high_x-300_d0150                PASS          PASS
+high_x-200_d0150               droop         droop
+high_x-100_d0150                PASS     collision
+high_x+000_d0150                PASS          PASS
+high_x+100_d0150           collision          PASS
+high_x+200_d0150               droop         droop
+high_x+300_d0150                PASS          PASS
+high_x+400_d0150           collision     collision
+high_x+500_d0150           collision     collision
+high_x-500_d0250                PASS          PASS
+high_x-400_d0250                PASS          PASS
+high_x-300_d0250                PASS          PASS
+high_x-200_d0250                PASS          PASS
+high_x-100_d0250                PASS          PASS
+high_x+000_d0250                PASS          PASS
+high_x+100_d0250                PASS          PASS
+high_x+200_d0250                PASS          PASS
+high_x+300_d0250                PASS          PASS
+high_x+400_d0250                PASS          PASS
+high_x+500_d0250                PASS          PASS
+high_x-500_d0350                PASS          PASS
+high_x-400_d0350                PASS          PASS
+high_x-300_d0350                PASS          PASS
+high_x-200_d0350                PASS          PASS
+high_x-100_d0350                PASS          PASS
+high_x+000_d0350                PASS          PASS
+high_x+100_d0350                PASS          PASS
+high_x+200_d0350                PASS          PASS
+high_x+300_d0350                PASS          PASS
+high_x+400_d0350                PASS          PASS
+high_x+500_d0350                PASS          PASS
+high_x-500_d0450               droop         droop
+high_x-400_d0450                PASS          PASS
+high_x-300_d0450                PASS          PASS
+high_x-200_d0450                PASS          PASS
+high_x-100_d0450                PASS          PASS
+high_x+000_d0450                PASS          PASS
+high_x+100_d0450                PASS          PASS
+high_x+200_d0450                PASS          PASS
+high_x+300_d0450                PASS          PASS
+high_x+400_d0450                PASS          PASS
+high_x+500_d0450               droop         droop
+high_x-500_d0550               droop         droop
+high_x-400_d0550               droop         droop
+high_x-300_d0550               droop         droop
+high_x-200_d0550                PASS          PASS
+high_x-100_d0550                PASS          PASS
+high_x+000_d0550                PASS          PASS
+high_x+100_d0550                PASS          PASS
+high_x+200_d0550                PASS          PASS
+high_x+300_d0550               droop         droop
+high_x+400_d0550               droop         droop
+high_x+500_d0550               droop         droop
+high_x-500_d0650               no IK             -
+high_x-400_d0650               droop             -
+high_x-300_d0650               droop             -
+high_x-200_d0650               droop             -
+high_x-100_d0650               droop             -
+high_x+000_d0650               droop             -
+high_x+100_d0650               droop             -
+high_x+200_d0650               droop             -
+high_x+300_d0650               droop             -
+high_x+400_d0650               droop             -
+high_x+500_d0650               no IK             -
+high_x-500_d0750               no IK             -
+high_x-400_d0750               no IK             -
+high_x-300_d0750               droop             -
+high_x-200_d0750               droop             -
+high_x-100_d0750               droop             -
+high_x+000_d0750               droop             -
+high_x+100_d0750               droop             -
+high_x+200_d0750               droop             -
+high_x+300_d0750               droop             -
+high_x+400_d0750               no IK             -
+high_x+500_d0750               no IK             -
+high_x-500_d0850               no IK             -
+high_x-400_d0850               no IK             -
+high_x-300_d0850               no IK             -
+high_x-200_d0850               no IK             -
+high_x-100_d0850               no IK             -
+high_x+000_d0850               no IK             -
+high_x+100_d0850               no IK             -
+high_x+200_d0850               no IK             -
+high_x+300_d0850               no IK             -
+high_x+400_d0850               no IK             -
+high_x+500_d0850               no IK             -
+high_x-500_d0950               no IK             -
+high_x-400_d0950               no IK             -
+high_x-300_d0950               no IK             -
+high_x-200_d0950               no IK             -
+high_x-100_d0950               no IK             -
+high_x+000_d0950               no IK             -
+high_x+100_d0950               no IK             -
+high_x+200_d0950               no IK             -
+high_x+300_d0950               no IK             -
+high_x+400_d0950               no IK             -
+high_x+500_d0950               no IK             -
+high_x-500_d1050               no IK             -
+high_x-400_d1050               no IK             -
+high_x-300_d1050               no IK             -
+high_x-200_d1050               no IK             -
+high_x-100_d1050               no IK             -
+high_x+000_d1050               no IK             -
+high_x+100_d1050               no IK             -
+high_x+200_d1050               no IK             -
+high_x+300_d1050               no IK             -
+high_x+400_d1050               no IK             -
+high_x+500_d1050               no IK             -
+--------------------------------------------------
+PASS                             116           116
+   of                            330           165
+
+  full         failures: no IK 125, droop 82, collision 7
+  half         failures: droop 42, collision 7
+  full         hits: left_upper_arm_link|right_wrist_2_link x2, left_wrist_2_link|right_upper_arm_link x2, right_grip_left_pad1|board_mid_back x1, left_grip_right_pad1|board_mid_back x1
+  half         hits: left_upper_arm_link|right_wrist_2_link x2, left_wrist_2_link|right_upper_arm_link x2, right_upper_arm_link|column x1, left_upper_arm_link|column x1
+
+verdicts -> bimanual_results.json

@@ -1,6 +1,7 @@
-"""Build the bimanual UR7e table scene with the MuJoCo spec (mjSpec) API,
-matching the real lab setup measured in setup_specs.md. Defines reward functions
-used in env.py
+"""Build the bimanual UR7e *gantry* table scene with the MuJoCo spec (mjSpec) API:
+same table/board/objects as build_urtable.py, but both arms hang upside down from
+an elevated column at the front of the table, each tilted 45 deg outward (away
+from the other). See setup_photos / the Vention render this is modelled on.
 
 NOTE FOR FUTURE AGENTS: the arm is a **UR7e**. The MJCF still lives at
 `universal_robots_ur5e/ur5e.xml` (and the menagerie dir keeps its UR5e name)
@@ -15,7 +16,7 @@ so we load the arm MJCF once per arm and attach a prefixed copy.
 Coordinate frame: origin at the center of the table footprint on the floor.
   +x = right, +y = back (away from cameras), +z = up.   Units: meters.
 
-Run directly to open the interactive viewer:  uv run python build_urtable.py
+Run directly to open the interactive viewer:  uv run python build_urgantry.py
 """
 
 from pathlib import Path
@@ -24,8 +25,8 @@ import numpy as np
 import mujoco
 
 # Resolved relative to this file (not the process cwd) so the package works
-# whether it's run in-place (`cd ur_sim && python test_viz.py`) or installed and
-# imported from anywhere (`import ur_sim`).
+# whether it's run in-place (`cd workspace_tests && python build_urgantry.py`) or
+# installed and imported from anywhere.
 ASSET_DIR = Path(__file__).resolve().parent
 
 # UR7e arm MJCF. Path keeps the legacy "ur5e" name (see module docstring); the
@@ -34,58 +35,72 @@ UR7E_PATH = str(ASSET_DIR / "universal_robots_ur5e" / "ur5e.xml")
 ROBOTIQ_PATH = str(ASSET_DIR / "gripper" / "robotiq-2f85.xml")
 ARDUCAM_PATH = str(ASSET_DIR / "gripper" / "arducam_ov9782.xml")
 
-# Wrist camera (one per arm): an ArduCam OV9782 board on a printed bracket that
-# saddles the Robotiq base, looking over the fingers at the grasp. The bracket
-# ("wrist_mount") is defined directly in the Robotiq XML; the camera module is
-# a separate MjSpec attached onto the bracket's "cam_attach" site (see
-# _arm_with_gripper below). Tune the bracket pose with tune_wrist_cam.py. See
-# gripper/robotiq-2f85.xml and gripper/arducam_ov9782.xml.
-
 # ---------------------------------------------------------------- measurements
 TABLE_H = 0.76          # aluminum frame top height
 BOARD_T = 0.015         # black board thickness (on top of the frame)
-PLATE_T = 0.006         # blue Vention mounting plate thickness (under each arm)
+PLATE_T = 0.006         # blue Vention mounting plate thickness (column footplate)
 TABLE_LEN = 1.725       # along x (left-right); cameras lie on this long edge
 TABLE_W = 1.14          # along y (front-back)
 
 BOARD_TOP = TABLE_H + BOARD_T          # 0.775
-# Blue plates bolt to the aluminum frame (not on top of the board); the board is
-# cut around them. So the plate sits on the aluminum at 0.76 and the arm base on it.
-ARM_Z = TABLE_H + PLATE_T              # 0.766  (UR7e base height)
 
 HALF_LEN = TABLE_LEN / 2               # 0.8625
 HALF_W = TABLE_W / 2                   # 0.57
 
-# Arm base placement: both arms centered in the width (56.5 cm from the front
-# edge ~= width/2), separated along the length, 12 cm in from each end edge,
-# facing each other across the length.
-ARM_FRONT_DIST = 0.565   # from front edge -> centered in the 114 cm width
-ARM_END_DIST = 0.12      # in from the left/right end edge
-ARM_Y = -HALF_W + ARM_FRONT_DIST                        # ~= -0.005 (centered)
-ARM_RIGHT = (HALF_LEN - ARM_END_DIST, ARM_Y)            # (+0.7425, -0.005)
-ARM_LEFT = (-(HALF_LEN - ARM_END_DIST), ARM_Y)          # (-0.7425, -0.005)
+# --------------------------------------------------------------- gantry column
+# A single vertical Vention extrusion bolted to the aluminum frame near the front
+# edge, carrying a head that both arms hang from.
+COL_Y = -0.45                          # column center, 12 cm in from the front edge
+COL_HALF = 0.045                       # 9x9 cm extrusion
+COL_FOOT_HALF = 0.09                   # blue footplate under the column
+COL_TOP_Z = BOARD_TOP + 0.78           # top of the column above the board
 
-# Single overhead camera (Intel RealSense D435): centered along the table length
-# on the front edge, elevated, tilted slightly down toward the work surface.
-CAM_POS = (0.0, -HALF_W + 0.05, BOARD_TOP + 0.675)  # centered in x, front edge, 67.5cm above table top
-CAM_DOWN_TILT = np.deg2rad(30.0)                    # 30 deg downward tilt from the table top (horizontal)
-CAM_TARGET = (CAM_POS[0],                           # look forward (+y, into the table)
-              CAM_POS[1] + np.cos(CAM_DOWN_TILT),   # and slightly down
-              CAM_POS[2] - np.sin(CAM_DOWN_TILT))
+# Head: horizontal plate across the top of the column; the two arm mounts bolt to
+# its underside on 45 deg wedges.
+HEAD_HALF_X = 0.24
+HEAD_HALF_Y = 0.10
+HEAD_T = 0.03
+HEAD_Z = COL_TOP_Z + HEAD_T / 2      
+
+# --------------------------------------------------------------- arm mounting
+# Both arms hang upside down (base flange up, arm pointing down) and are rolled
+# 45 deg outward about +y, so the left arm leans toward -x and the right toward
+# +x -- i.e. away from each other.
+ARM_TILT = np.deg2rad(45.0)
+ARM_MOUNT_X = 0.155                    # mount center offset from the column axis
+ARM_Z = COL_TOP_Z - 0.06               # base flange height (elevated over the board)
+ARM_LEFT = (-ARM_MOUNT_X, COL_Y)
+ARM_RIGHT = (ARM_MOUNT_X, COL_Y)
+
+
+def _upside_down_quat(tilt: float) -> list[float]:
+    """Quat [w,x,y,z] for Ry(tilt) * Rx(180deg): flip the base over (its +z, which
+    the arm grows along, now points down) then lean it by `tilt` about +y, so the
+    arm hangs and splays toward -x for tilt>0 / +x for tilt<0."""
+    flip = np.array([np.cos(np.pi / 2), np.sin(np.pi / 2), 0.0, 0.0])   # Rx(pi)
+    lean = np.array([np.cos(tilt / 2), 0.0, np.sin(tilt / 2), 0.0])     # Ry(tilt)
+    quat = np.zeros(4)
+    mujoco.mju_mulQuat(quat, lean, flip)
+    return quat.tolist()
+
+
+LEFT_BASE_QUAT = _upside_down_quat(ARM_TILT)
+RIGHT_BASE_QUAT = _upside_down_quat(-ARM_TILT)
+
+# Single overhead camera (Intel RealSense D435): centered on the front edge, the
+# same edge the gantry stands on, looking back over the column at the work surface.
+# It has to stand off the table (not on the edge itself like in build_urtable.py):
+# anywhere on the edge is inside the arms' swept volume, and a centered lens ends
+# up 2.5 cm from the column with nothing else in frame.
+CAM_POS = (0.0, -1.25, BOARD_TOP + 0.825)   # 68cm out from the front edge, 82.5cm above the board
+CAM_TARGET = (0.0, 0.10, BOARD_TOP)         # center of the work surface
 CAM_FOVY = 42.0                        # D435 color vertical FOV (deg)
 
-# UR7e initial pose (radians): arms reach out over the table (not folded up), flange
-# pointing down — matching the photos.  [pan, lift, elbow, w1, w2, w3]
-# The two arms face each other: each has its own full home pose so they reach
-# toward the table center (+x for the left arm, -x for the right).
-LEFT_HOME_POSE = [ 1.5700, -1.5700,  1.5700, -1.5700, -1.5700, -1.5700]
-RIGHT_HOME_POSE = [-1.5700, -1.5700, -1.5700, -1.5700,  1.5700,  1.5700]
-# Left base yaw: -90deg about z (clockwise from above) so the left arm faces the
-# table at LEFT_HOME_POSE. Quat [w, x, y, z] for a rotation of theta about +z.
-LEFT_BASE_YAW = np.pi / 2
-LEFT_BASE_QUAT = [np.cos(LEFT_BASE_YAW / 2), 0.0, 0.0, np.sin(LEFT_BASE_YAW / 2)]
-RIGHT_BASE_YAW = -np.pi / 2
-RIGHT_BASE_QUAT = [np.cos(RIGHT_BASE_YAW / 2), 0.0, 0.0, np.sin(RIGHT_BASE_YAW / 2)]
+# UR7e initial pose (radians): hanging from the head, each arm folds back over the
+# board and out over its own object, flange pointing down.
+#   [pan, lift, elbow, w1, w2, w3]
+LEFT_HOME_POSE = [ 1.3969, -1.6581,  2.3117, -2.3623,  0.7424, 0.0]
+RIGHT_HOME_POSE = [-1.3969, -1.4835, -2.3117, -0.7793, -0.7424, 0.0]
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow", "wrist_1", "wrist_2", "wrist_3"]
 
 # Robotiq 2F-85 gripper: one actuator per arm, ctrl 0 = open, 255 = closed.
@@ -93,21 +108,21 @@ GRIPPER_OPEN, GRIPPER_CLOSED = 0.0, 255.0
 
 # --------------------------------------------------------------- pick task
 # A graspable block sits on the board; the task is to lift it. Placed within the
-# left arm's reach. Success = block lifted LIFT_SUCCESS_H above its rest height.
+# right arm's reach. Success = block lifted LIFT_SUCCESS_H above its rest height.
 BLOCK_HALF = 0.025                                   # 5 cm cube
 BLOCK_REST_Z = BOARD_TOP + BLOCK_HALF
-BLOCK_INIT_POS = (-0.45, 0.0, BLOCK_REST_Z)
+BLOCK_INIT_POS = (0.35, -0.05, BLOCK_REST_Z)
 BLOCK_RGBA = [0.15, 0.75, 0.20, 1]
 LIFT_SUCCESS_H = 0.05                                # meters above rest to count as a pick
 
 # --------------------------------------------------------------- cardboard tray
 # Open-top box (corrugated cardboard tray) sitting on the board, clear of the
-# block's pick site and both arm bases.
+# block's pick site and the column footprint.
 BOX_OUTER = 0.16                                     # outer footprint, square
 BOX_WALL_T = 0.006
 BOX_WALL_H = 0.035
 BOX_FLOOR_T = 0.004
-BOX_INIT_POS = (-0.35, 0.25, BOARD_TOP + BOX_FLOOR_T / 2)
+BOX_INIT_POS = (-0.35, -0.05, BOARD_TOP + BOX_FLOOR_T / 2)
 BOX_RGBA = [0.72, 0.53, 0.34, 1]
 
 # colors
@@ -149,7 +164,8 @@ def _arm_with_gripper() -> mujoco.MjSpec:
 
 
 def build_spec() -> mujoco.MjSpec:
-    """Construct the floor, table, board, plates, two UR7e arms, and cameras."""
+    """Construct the floor, table, board, gantry column, two hanging UR7e arms,
+    and cameras."""
     spec = mujoco.MjSpec()
     spec.compiler.autolimits = True
     # Offscreen buffer sized for the OV9782 wrist cameras (1280x800); covers the
@@ -158,7 +174,7 @@ def build_spec() -> mujoco.MjSpec:
     spec.visual.global_.offheight = 800
     spec.visual.headlight.ambient = [0.35, 0.35, 0.35]
     spec.visual.headlight.diffuse = [0.6, 0.6, 0.6]
-    # Pin the model extent to the working area (table + arms), not the room's
+    # Pin the model extent to the working area (table + gantry), not the room's
     # bounding box. znear is znear_ratio * extent (default ratio 0.01); left
     # unpinned, the 6x6m floor/walls inflate extent to ~12m, pushing znear past
     # 12cm and clipping the wrist-cam mount/arm links, which sit only a few cm
@@ -222,41 +238,43 @@ def build_spec() -> mujoco.MjSpec:
                         pos=[sx * (HALF_LEN - leg_inset), sy * (HALF_W - leg_inset), leg_h / 2],
                         rgba=COL_LEG)
 
-    # --- blue Vention mounting plates: bolted to the aluminum frame ---------
-    plate_half = 0.09
-    plate_z = TABLE_H + PLATE_T / 2
-    for name, (ax, ay) in (("left", ARM_LEFT), ("right", ARM_RIGHT)):
-        wb.add_geom(name=f"plate_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
-                    size=[plate_half, plate_half, PLATE_T / 2], pos=[ax, ay, plate_z],
-                    rgba=COL_PLATE)
-
-    # --- black board on top, cut around each plate --------------------------
+    # --- black board on top, cut around the column footplate ----------------
     board_z = TABLE_H + BOARD_T / 2
-    hx = abs(ARM_LEFT[0]) - plate_half        # inner x edge of the plate holes (0.6525)
-    hy_lo, hy_hi = ARM_Y - plate_half, ARM_Y + plate_half
+    nx0, nx1 = -COL_FOOT_HALF, COL_FOOT_HALF
+    ny0, ny1 = COL_Y - COL_FOOT_HALF, COL_Y + COL_FOOT_HALF
     pieces = [
-        ("mid", (-hx, hx), (-HALF_W, HALF_W)),               # full-width center span
-        ("Lfront", (-HALF_LEN, -hx), (-HALF_W, hy_lo)),      # left end, front of plate
-        ("Lback", (-HALF_LEN, -hx), (hy_hi, HALF_W)),        # left end, behind plate
-        ("Rfront", (hx, HALF_LEN), (-HALF_W, hy_lo)),        # right end, front of plate
-        ("Rback", (hx, HALF_LEN), (hy_hi, HALF_W)),          # right end, behind plate
+        ("neg_x", (-HALF_LEN, nx0), (-HALF_W, HALF_W)),
+        ("pos_x", (nx1, HALF_LEN), (-HALF_W, HALF_W)),
+        ("mid_front", (nx0, nx1), (-HALF_W, ny0)),
+        ("mid_back", (nx0, nx1), (ny1, HALF_W)),
     ]
     for name, (x0, x1), (y0, y1) in pieces:
         wb.add_geom(name=f"board_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
                     size=[(x1 - x0) / 2, (y1 - y0) / 2, BOARD_T / 2],
                     pos=[(x0 + x1) / 2, (y0 + y1) / 2, board_z], material="board_plastic")
 
-    # --- arms ----------------------------------------------------------------
-    # The left base is yawed -90deg about z (clockwise viewed from above) so the
-    # left arm faces into the table (reaches +x toward center) at LEFT_HOME_POSE. The
-    # right base keeps the default orientation. (Unlike a frame's euler, a body
-    # quat DOES propagate through attach, so we orient the base via the mount.)
-    left_mount = wb.add_body(name="left_robot_mount", pos=[*ARM_LEFT, ARM_Z],
-                             quat=LEFT_BASE_QUAT)
-    right_mount = wb.add_body(name="right_robot_mount", pos=[*ARM_RIGHT, ARM_Z],
-                              quat=RIGHT_BASE_QUAT)
-    left_mount.add_frame().attach_body(_arm_with_gripper().body("base"), "left_", "")
-    right_mount.add_frame().attach_body(_arm_with_gripper().body("base"), "right_", "")
+    # --- gantry: blue footplate + vertical extrusion + head plate -----------
+    wb.add_geom(name="column_foot", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[COL_FOOT_HALF, COL_FOOT_HALF, PLATE_T / 2],
+                pos=[0, COL_Y, TABLE_H + PLATE_T / 2], rgba=COL_PLATE)
+    col_z0 = TABLE_H + PLATE_T
+    wb.add_geom(name="column", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[COL_HALF, COL_HALF, (COL_TOP_Z - col_z0) / 2],
+                pos=[0, COL_Y, (col_z0 + COL_TOP_Z) / 2], rgba=COL_PLATE)
+    wb.add_geom(name="gantry_head", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[HEAD_HALF_X, HEAD_HALF_Y, HEAD_T / 2],
+                pos=[0, COL_Y, HEAD_Z], rgba=COL_PLATE)
+
+    # --- arms: hung upside down off the head, splayed 45 deg outward --------
+    # (Unlike a frame's euler, a body quat DOES propagate through attach, so we
+    # orient each base via its mount body.)
+    for side, (ax, ay), quat in (("left", ARM_LEFT, LEFT_BASE_QUAT),
+                                 ("right", ARM_RIGHT, RIGHT_BASE_QUAT)):
+        mount = wb.add_body(name=f"{side}_robot_mount", pos=[ax, ay, ARM_Z], quat=quat)
+        mount.add_geom(name=f"plate_{side}", type=mujoco.mjtGeom.mjGEOM_BOX,
+                       size=[0.075, 0.075, PLATE_T / 2], pos=[0, 0, -PLATE_T / 2],
+                       rgba=COL_PLATE, contype=0, conaffinity=0)
+        mount.add_frame().attach_body(_arm_with_gripper().body("base"), f"{side}_", "")
 
     # Wrist F/T: force+torque sensors at each gripper flange report the wrench
     # transmitted between the gripper subtree and wrist_3, in the flange (site)
@@ -322,9 +340,9 @@ def build_model() -> mujoco.MjModel:
 # Viewport: the free camera's orbit angle / zoom / look-at target.
 INITIAL_VIEW = {
     "azimuth": 90.0,
-    "elevation": -20.0,
-    "distance": 2.5,
-    "lookat": [0.0, 0.0, BOARD_TOP],   # center of the work surface
+    "elevation": -10.0,
+    "distance": 3.0,
+    "lookat": [0.0, 0.0, BOARD_TOP + 0.35],   # between the board and the gantry head
 }
 
 
@@ -369,7 +387,7 @@ def capture_state(data: mujoco.MjData, viewer) -> None:
     current arm joint angles (for LEFT_HOME_POSE) and block position, so you can
     hard-code the state you've navigated to."""
     cam = viewer.cam
-    print("\n# --- paste INITIAL_VIEW into build_urtable.py ---")
+    print("\n# --- paste INITIAL_VIEW into build_urgantry.py ---")
     print("INITIAL_VIEW = {")
     print(f'    "azimuth": {cam.azimuth:.3f},')
     print(f'    "elevation": {cam.elevation:.3f},')
@@ -381,7 +399,7 @@ def capture_state(data: mujoco.MjData, viewer) -> None:
 
 
 def build_scene() -> tuple[mujoco.MjModel, mujoco.MjData]:
-    """Build the scene and return model + data initialized to INITIAL_QPOS, with
+    """Build the scene and return model + data initialized to the home pose, with
     the position actuators commanded to hold it and forward kinematics evaluated."""
     model = build_model()
     data = mujoco.MjData(model)
@@ -397,8 +415,8 @@ def main() -> None:
     model, data = build_scene()
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
-        viewer.opt.frame = mujoco.mjtFrame.mjFRAME_SITE
-        viewer.opt.sitegroup[5] = True  # sites use group 5 (see robotiq-2f85.xml); off by default
+        apply_initial_view(viewer)
+        viewer.sync()
         while viewer.is_running():
             step_start = time.time()
             mujoco.mj_step(model, data)

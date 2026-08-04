@@ -1,6 +1,11 @@
-"""Build the bimanual UR7e table scene with the MuJoCo spec (mjSpec) API,
-matching the real lab setup measured in setup_specs.md. Defines reward functions
-used in env.py
+"""Bimanual UR7e table scene, angled-stand variant: instead of bolting both arms
+flat to the board side by side, they sit on a raised mounting block whose two
+faces are pitched 45 deg off horizontal, tipping the arms away from each other
+along x (so the two base axes are 90 deg apart). Modeled on the Vention "UR dual
+arm robot stand" (two 180x180 mm mounting plates at a 45 degree angle):
+https://vention.com/designs/ur3-dual-arm-robot-stand-fixed-with-panels-15892
+
+Same API as build_urtable.py (build_spec/build_model/build_scene/set_initial_pose).
 
 NOTE FOR FUTURE AGENTS: the arm is a **UR7e**. The MJCF still lives at
 `universal_robots_ur5e/ur5e.xml` (and the menagerie dir keeps its UR5e name)
@@ -15,7 +20,7 @@ so we load the arm MJCF once per arm and attach a prefixed copy.
 Coordinate frame: origin at the center of the table footprint on the floor.
   +x = right, +y = back (away from cameras), +z = up.   Units: meters.
 
-Run directly to open the interactive viewer:  uv run python build_urtable.py
+Run directly to open the interactive viewer:  uv run python build_urtable_45.py
 """
 
 from pathlib import Path
@@ -49,21 +54,26 @@ TABLE_LEN = 1.725       # along x (left-right); cameras lie on this long edge
 TABLE_W = 1.14          # along y (front-back)
 
 BOARD_TOP = TABLE_H + BOARD_T          # 0.775
-# Blue plates bolt to the aluminum frame (not on top of the board); the board is
-# cut around them. So the plate sits on the aluminum at 0.76 and the arm base on it.
-ARM_Z = TABLE_H + PLATE_T              # 0.766  (UR7e base height)
 
 HALF_LEN = TABLE_LEN / 2               # 0.8625
 HALF_W = TABLE_W / 2                   # 0.57
 
-# Arm base placement: both arms centered in the width (56.5 cm from the front
-# edge ~= width/2), separated along the length, 12 cm in from each end edge,
-# facing each other across the length.
-ARM_FRONT_DIST = 0.565   # from front edge -> centered in the 114 cm width
-ARM_END_DIST = 0.12      # in from the left/right end edge
-ARM_Y = -HALF_W + ARM_FRONT_DIST                        # ~= -0.005 (centered)
-ARM_RIGHT = (HALF_LEN - ARM_END_DIST, ARM_Y)            # (+0.7425, -0.005)
-ARM_LEFT = (-(HALF_LEN - ARM_END_DIST), ARM_Y)          # (-0.7425, -0.005)
+# --- angled dual-arm mounting block ---------------------------------------
+# An aluminum pedestal on the board carrying two 45 deg wedges. Each 180x180 mm
+# Vention plate bolts to a wedge face, so the two arms lean 45 deg off vertical
+# in the x-z plane, tipping away from each other (90 deg between the base axes).
+MOUNT_H = 0.18           # pedestal height above the board
+MOUNT_Y = -HALF_W + 0.20                                # -0.37, stand center
+MOUNT_TOP = BOARD_TOP + MOUNT_H
+ARM_Z = MOUNT_TOP        # UR7e base height (top face of each plate)
+
+ARM_TILT = np.deg2rad(45.0)   # each base off vertical; the two lean apart in x
+WEDGE_HALF = 0.10        # half the mounting face, along the slope (fits the plate)
+WEDGE_T = 0.05           # half the wedge's thickness, measured along the face normal
+ARM_SEPARATION = 0.30    # center-to-center between the two bases (they diverge
+                         # going up, so the gap only opens from here)
+ARM_LEFT = (-ARM_SEPARATION / 2, MOUNT_Y)               # (-0.15, -0.37)
+ARM_RIGHT = (ARM_SEPARATION / 2, MOUNT_Y)               # (+0.15, -0.37)
 
 # Single overhead camera (Intel RealSense D435): centered along the table length
 # on the front edge, elevated, tilted slightly down toward the work surface.
@@ -76,16 +86,36 @@ CAM_FOVY = 42.0                        # D435 color vertical FOV (deg)
 
 # UR7e initial pose (radians): arms reach out over the table (not folded up), flange
 # pointing down — matching the photos.  [pan, lift, elbow, w1, w2, w3]
-# The two arms face each other: each has its own full home pose so they reach
-# toward the table center (+x for the left arm, -x for the right).
+# Both arms sit on the same edge and face into the table (+y); their home poses
+# stay mirrored so the elbows splay outward (away from each other) instead of
+# reaching into the 2cm gap between the bases.
 LEFT_HOME_POSE = [ 1.5700, -1.5700,  1.5700, -1.5700, -1.5700, -1.5700]
 RIGHT_HOME_POSE = [-1.5700, -1.5700, -1.5700, -1.5700,  1.5700,  1.5700]
-# Left base yaw: -90deg about z (clockwise from above) so the left arm faces the
-# table at LEFT_HOME_POSE. Quat [w, x, y, z] for a rotation of theta about +z.
-LEFT_BASE_YAW = np.pi / 2
-LEFT_BASE_QUAT = [np.cos(LEFT_BASE_YAW / 2), 0.0, 0.0, np.sin(LEFT_BASE_YAW / 2)]
-RIGHT_BASE_YAW = -np.pi / 2
-RIGHT_BASE_QUAT = [np.cos(RIGHT_BASE_YAW / 2), 0.0, 0.0, np.sin(RIGHT_BASE_YAW / 2)]
+# Base orientation: 180deg about z faces an arm (at pan=0) into the table from
+# the front edge; it is then leaned ARM_TILT about world +y so it tips over
+# toward +x. The left base leans -x, the right +x, so they fall away from each
+# other. Quat convention is [w, x, y, z].
+ARM_BASE_YAW = np.pi
+
+
+def _axis_quat(axis, theta: float) -> np.ndarray:
+    axis = np.asarray(axis, float)
+    return np.array([np.cos(theta / 2), *(np.sin(theta / 2) * axis)])
+
+
+def _mount_quat(tilt: float) -> list[float]:
+    """Yaw into the table, then lean `tilt` about world +y (positive = toward +x)."""
+    quat = np.zeros(4)
+    mujoco.mju_mulQuat(quat, _axis_quat([0, 1, 0], tilt),
+                       _axis_quat([0, 0, 1], ARM_BASE_YAW))
+    return list(quat)
+
+
+LEFT_BASE_QUAT = _mount_quat(-ARM_TILT)
+RIGHT_BASE_QUAT = _mount_quat(ARM_TILT)
+# Outward unit normal of each mounting face (= each base's up axis).
+LEFT_FACE_N = np.array([-np.sin(ARM_TILT), 0.0, np.cos(ARM_TILT)])
+RIGHT_FACE_N = np.array([np.sin(ARM_TILT), 0.0, np.cos(ARM_TILT)])
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow", "wrist_1", "wrist_2", "wrist_3"]
 
 # Robotiq 2F-85 gripper: one actuator per arm, ctrl 0 = open, 255 = closed.
@@ -93,10 +123,10 @@ GRIPPER_OPEN, GRIPPER_CLOSED = 0.0, 255.0
 
 # --------------------------------------------------------------- pick task
 # A graspable block sits on the board; the task is to lift it. Placed within the
-# left arm's reach. Success = block lifted LIFT_SUCCESS_H above its rest height.
+# right arm's reach. Success = block lifted LIFT_SUCCESS_H above its rest height.
 BLOCK_HALF = 0.025                                   # 5 cm cube
 BLOCK_REST_Z = BOARD_TOP + BLOCK_HALF
-BLOCK_INIT_POS = (-0.45, 0.0, BLOCK_REST_Z)
+BLOCK_INIT_POS = (0.30, 0.0, BLOCK_REST_Z)      # out along the right arm's splay
 BLOCK_RGBA = [0.15, 0.75, 0.20, 1]
 LIFT_SUCCESS_H = 0.05                                # meters above rest to count as a pick
 
@@ -107,7 +137,7 @@ BOX_OUTER = 0.16                                     # outer footprint, square
 BOX_WALL_T = 0.006
 BOX_WALL_H = 0.035
 BOX_FLOOR_T = 0.004
-BOX_INIT_POS = (-0.35, 0.25, BOARD_TOP + BOX_FLOOR_T / 2)
+BOX_INIT_POS = (-0.32, 0.05, BOARD_TOP + BOX_FLOOR_T / 2)   # out along the left arm's splay
 BOX_RGBA = [0.72, 0.53, 0.34, 1]
 
 # colors
@@ -222,53 +252,44 @@ def build_spec() -> mujoco.MjSpec:
                         pos=[sx * (HALF_LEN - leg_inset), sy * (HALF_W - leg_inset), leg_h / 2],
                         rgba=COL_LEG)
 
-    # --- blue Vention mounting plates: bolted to the aluminum frame ---------
-    plate_half = 0.09
-    plate_z = TABLE_H + PLATE_T / 2
-    for name, (ax, ay) in (("left", ARM_LEFT), ("right", ARM_RIGHT)):
-        wb.add_geom(name=f"plate_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
-                    size=[plate_half, plate_half, PLATE_T / 2], pos=[ax, ay, plate_z],
-                    rgba=COL_PLATE)
+    # --- black board on top: uninterrupted, the stand sits on it -------------
+    # (Unlike the flush layout, nothing is bolted through the board here, so no
+    # cutout is needed.)
+    wb.add_geom(name="board", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[HALF_LEN, HALF_W, BOARD_T / 2],
+                pos=[0, 0, TABLE_H + BOARD_T / 2], material="board_plastic")
 
-    # --- black board on top, cut around each plate --------------------------
-    board_z = TABLE_H + BOARD_T / 2
-    hx = abs(ARM_LEFT[0]) - plate_half        # inner x edge of the plate holes (0.6525)
-    hy_lo, hy_hi = ARM_Y - plate_half, ARM_Y + plate_half
-    pieces = [
-        ("mid", (-hx, hx), (-HALF_W, HALF_W)),               # full-width center span
-        ("Lfront", (-HALF_LEN, -hx), (-HALF_W, hy_lo)),      # left end, front of plate
-        ("Lback", (-HALF_LEN, -hx), (hy_hi, HALF_W)),        # left end, behind plate
-        ("Rfront", (hx, HALF_LEN), (-HALF_W, hy_lo)),        # right end, front of plate
-        ("Rback", (hx, HALF_LEN), (hy_hi, HALF_W)),          # right end, behind plate
-    ]
-    for name, (x0, x1), (y0, y1) in pieces:
-        wb.add_geom(name=f"board_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
-                    size=[(x1 - x0) / 2, (y1 - y0) / 2, BOARD_T / 2],
-                    pos=[(x0 + x1) / 2, (y0 + y1) / 2, board_z], material="board_plastic")
+    # --- angled dual-arm mounting block --------------------------------------
+    plate_half = 0.09                     # 180 x 180 mm Vention mounting plate
+    # Pedestal kept inboard of the bases: leaning the arms out swings each
+    # shoulder link down over the stand's shoulder, which a full-width top would
+    # foul.
+    wb.add_geom(name="mount_pedestal", type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[ARM_SEPARATION / 2, WEDGE_HALF, MOUNT_H / 2],
+                pos=[0, MOUNT_Y, BOARD_TOP + MOUNT_H / 2], rgba=COL_ALU)
 
     # --- arms ----------------------------------------------------------------
-    # The left base is yawed -90deg about z (clockwise viewed from above) so the
-    # left arm faces into the table (reaches +x toward center) at LEFT_HOME_POSE. The
-    # right base keeps the default orientation. (Unlike a frame's euler, a body
-    # quat DOES propagate through attach, so we orient the base via the mount.)
-    left_mount = wb.add_body(name="left_robot_mount", pos=[*ARM_LEFT, ARM_Z],
-                             quat=LEFT_BASE_QUAT)
-    right_mount = wb.add_body(name="right_robot_mount", pos=[*ARM_RIGHT, ARM_Z],
-                              quat=RIGHT_BASE_QUAT)
-    left_mount.add_frame().attach_body(_arm_with_gripper().body("base"), "left_", "")
-    right_mount.add_frame().attach_body(_arm_with_gripper().body("base"), "right_", "")
-
-    # Wrist F/T: force+torque sensors at each gripper flange report the wrench
-    # transmitted between the gripper subtree and wrist_3, in the flange (site)
-    # frame -- the same quantity a UR wrist F/T sensor measures. Reading is
-    # nonzero at rest (tool weight + Robotiq linkage constraint preload), so
-    # consumers should tare against a no-contact reference pose.
-    for side in ("left", "right"):
-        spec.body(f"{side}_grip_base_mount").add_site(name=f"{side}_ft_site")
-        spec.add_sensor(name=f"{side}_ft_force", type=mujoco.mjtSensor.mjSENS_FORCE,
-                        objtype=mujoco.mjtObj.mjOBJ_SITE, objname=f"{side}_ft_site")
-        spec.add_sensor(name=f"{side}_ft_torque", type=mujoco.mjtSensor.mjSENS_TORQUE,
-                        objtype=mujoco.mjtObj.mjOBJ_SITE, objname=f"{side}_ft_site")
+    # Each base sits on a 45 deg wedge face, leaning away from the other. The
+    # wedge is a box carrying the same tilt as the base, pushed back along the
+    # face normal by its own half-thickness (plus the plate) so its outer face
+    # lands exactly under the plate; its lower half buries into the pedestal.
+    # (Unlike a frame's euler, a body quat DOES propagate through attach, so we
+    # orient the base via the mount body, and hang its plate off the same body
+    # so the plate leans with it.)
+    for side, (ax, ay), quat, normal in (
+        ("left", ARM_LEFT, LEFT_BASE_QUAT, LEFT_FACE_N),
+        ("right", ARM_RIGHT, RIGHT_BASE_QUAT, RIGHT_FACE_N),
+    ):
+        base_pos = np.array([ax, ay, ARM_Z])
+        wb.add_geom(name=f"mount_wedge_{side}", type=mujoco.mjtGeom.mjGEOM_BOX,
+                    size=[WEDGE_HALF, WEDGE_HALF, WEDGE_T],
+                    pos=list(base_pos - normal * (WEDGE_T + PLATE_T)), quat=quat,
+                    rgba=COL_ALU)
+        mount = wb.add_body(name=f"{side}_robot_mount", pos=list(base_pos), quat=quat)
+        mount.add_geom(name=f"plate_{side}", type=mujoco.mjtGeom.mjGEOM_BOX,
+                       size=[plate_half, plate_half, PLATE_T / 2], pos=[0, 0, -PLATE_T / 2],
+                       rgba=COL_PLATE)
+        mount.add_frame().attach_body(_arm_with_gripper().body("base"), f"{side}_", "")
 
     # --- graspable block (free joint) for the pick task ---------------------
     block = wb.add_body(name="block", pos=list(BLOCK_INIT_POS))
@@ -324,7 +345,7 @@ INITIAL_VIEW = {
     "azimuth": 90.0,
     "elevation": -20.0,
     "distance": 2.5,
-    "lookat": [0.0, 0.0, BOARD_TOP],   # center of the work surface
+    "lookat": [0.0, 0.0, MOUNT_TOP],   # top of the stand, mid-height of the arms
 }
 
 

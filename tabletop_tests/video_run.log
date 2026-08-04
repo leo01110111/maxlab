@@ -1,0 +1,3 @@
+full: 8250 frames -> waypoint_videos/full.mp4
+half: 4125 frames -> waypoint_videos/half.mp4
+combined -> waypoint_videos/both_scenes.mp4
