@@ -50,9 +50,48 @@ Pass rate by distance out from the mount edge (33 waypoints per row, all layers)
 | `full`   | 26    | 31 | 29 | 21 | 9  | 0  | 0  | 0  | 0  | 0   |
 | `half`   | 26    | 31 | 29 | 21 | 9  | -- | -- | -- | -- | --  |
 
-Nothing past 55 cm from the mount edge is reachable bimanually (`no IK` from 65 cm
-out), and the last row before that already only manages 9/33. The two scenes score
-identically row for row; the whole difference between them is board no arm can use.
+The two scenes score identically row for row; the whole difference between them is
+board no arm can use.
+
+`workspace_benchmark.py` adds the dexterity bar (45 deg tilt cone + 270 deg roll,
+30 deg cone for the bimanual check):
+
+```
+=== each scene over its own exposed tabletop ===
+scene       n   left  right  either  bimanual  mean tilt  mean roll
+full      330     26     54      72       108      36deg      300deg
+half      165     24     50      68        98      38deg      319deg
+
+=== common subset (165 shared waypoints) ===
+full      165     26     54      72        98      39deg      319deg
+half      165     24     50      68        98      38deg      319deg
+```
+
+All 72 of the full table's dexterous waypoints are inside the shared 58.5 cm; the
+extra depth adds none at any bar. The +-4 differences on identical positions are IK
+restart luck (the seeded rng is consumed in a different order once the grids
+diverge), the same size as the 2-waypoint disagreement in the bimanual test.
+
+## Why the boundary sits at ~55 cm
+
+The two tests disagree about the 65 cm row -- the benchmark passes 10 waypoints
+there bimanually, `bimanual_test.py` passes none -- and the disagreement is real
+information, not a bug. Those 10 are exactly reachable: IK converges to <0.1 mm for
+both arms with zero collisions, reproducibly across rng seeds. They fail the
+bimanual test as `droop`, sagging 22-26 mm under gravity against its 20 mm hold
+tolerance. At 55 cm the same story is already visible: 9 PASS, 22 droop.
+
+So the working depth is set by *stiffness*, not only by kinematics. With the scenes'
+position servos (kp 2000) and no gravity compensation, useful depth runs out around
+55 cm; stiffer gains, gravity feedforward or a looser tolerance would push the
+boundary out somewhat -- but not to 112 cm, since `no IK` takes over from 75 cm.
+
+## Caveats
+
+The left/right split (26 vs 54 on the dexterity bar) is which IK branch the shared
+home pose warm-starts each arm into, not a real handedness effect -- the two arms
+are geometric mirrors. Worth fixing in the home poses before reading anything into
+per-arm numbers.
 
 So the 112 cm deep table costs 83 % more footprint than the 58.5 cm one and buys no
 extra working area. If more reach is wanted, it has to come from the mount (a taller

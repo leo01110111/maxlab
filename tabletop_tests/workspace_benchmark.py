@@ -48,6 +48,7 @@ from workspace_probe import (
 )
 
 HERE = Path(__file__).resolve().parent
+RESULTS_PATH = HERE / "benchmark_results.json"
 BOARD_TOP = 0.775
 
 # --------------------------------------------------------------- the work volume
@@ -217,13 +218,24 @@ def passes(m: dict, wp: dict) -> bool:
     return m["reach"] and m["tilt"] >= wp["tilt_min"] and m["roll"] >= wp["roll_min"]
 
 
+def why_counts(rows: list[dict]) -> Counter:
+    """What stopped each arm-waypoint that did not pass, over exactly `rows` -- so a
+    subset table reports the failures of that subset and not of the whole scene."""
+    tally = Counter()
+    for row in rows:
+        for m in row["arms"].values():
+            if not m["pass"]:
+                tally[m["why"] if m["reach"] else "no reach"] += 1
+    return tally
+
+
 def score_scene(scene: str, quick: bool = False, verbose: bool = True) -> dict:
     mod, model, data, arms = build(scene)
     arm_list = list(arms.values())
     waypoints = load_benchmark(scene)
     scratch = mujoco.MjData(model)
     rng = np.random.default_rng(0)
-    rows, why_counts = [], Counter()
+    rows = []
 
     for wp in waypoints:
         pos = np.array(wp["pos"])
@@ -234,8 +246,6 @@ def score_scene(scene: str, quick: bool = False, verbose: bool = True) -> dict:
             m = measure(model, scratch, arm, pos, rng, wp, quick)
             m["pass"] = passes(m, wp)
             row["arms"][name] = m
-            if not m["pass"]:
-                why_counts[m["why"] if m["reach"] else "no reach"] += 1
 
         # Bimanual: both arms in the volume at once, each on its own side.
         goals = split_targets(arm_list, data, pos, wp["separation"])
@@ -271,11 +281,11 @@ def score_scene(scene: str, quick: bool = False, verbose: bool = True) -> dict:
         row["cross"] = cross
         rows.append(row)
 
-    _print_scene(scene, rows, why_counts, table=verbose)
-    return {"scene": scene, "rows": rows, "why": why_counts}
+    _print_scene(scene, rows, why_counts(rows), table=verbose)
+    return {"scene": scene, "rows": rows}
 
 
-def _print_scene(scene: str, rows: list[dict], why_counts: Counter, table: bool = True) -> None:
+def _print_scene(scene: str, rows: list[dict], tally: Counter, table: bool = True) -> None:
     print(f"\n=== {scene} ===")
     if table:
         header = (f"{'waypoint':<22}{'left':>26}{'right':>26}{'both':>7}")
@@ -309,9 +319,9 @@ def _print_scene(scene: str, rows: list[dict], why_counts: Counter, table: bool 
           f"left {sum(r['arms']['left']['pass'] for r in rows):>2}  "
           f"right {sum(r['arms']['right']['pass'] for r in rows):>2}  "
           f"either {either:>2}  bimanual {sum(r['both'] for r in rows):>2}")
-    if why_counts:
+    if tally:
         print("  limiting factor: " +
-              ", ".join(f"{k} {v}" for k, v in why_counts.most_common()))
+              ", ".join(f"{k} {v}" for k, v in tally.most_common()))
 
 
 def _compare_table(results: list[dict], title: str, rows_of) -> None:
@@ -323,7 +333,9 @@ def _compare_table(results: list[dict], title: str, rows_of) -> None:
         tilts = [m["tilt"] for r in rows for m in r["arms"].values() if m["reach"]]
         rolls = [m["roll"] for r in rows for m in r["arms"].values() if m["reach"]]
         either = sum(any(r["arms"][x]["pass"] for x in ("left", "right")) for r in rows)
-        top = res["why"].most_common(1)
+        # Recount over `rows`, not res["why"]: on a subset table the scene-wide
+        # counter would attribute failures from waypoints that are not in the subset.
+        top = why_counts(rows).most_common(1)
         print(f"{res['scene']:<14}{len(rows):>5}"
               f"{sum(r['arms']['left']['pass'] for r in rows):>7}"
               f"{sum(r['arms']['right']['pass'] for r in rows):>7}"
@@ -344,6 +356,20 @@ def compare(results: list[dict]) -> None:
     if common and any(len(res["rows"]) != len(common) for res in results):
         _compare_table(results, f"common subset ({len(common)} shared waypoints)",
                        lambda res: [r for r in res["rows"] if r["wp"]["name"] in common])
+
+
+def save_results(results: list[dict]) -> Path:
+    """Per-waypoint scores, so the run can be re-tabulated (by row, by layer, by
+    subset) without paying for the sweeps again."""
+    out = {res["scene"]: {r["wp"]["name"]: {
+        "pos": r["wp"]["pos"], "layer": r["wp"]["layer"],
+        "arms": {n: {k: (float(m[k]) if k in ("tilt", "roll") else m[k])
+                     for k in ("reach", "tilt", "roll", "why", "pass")}
+                 for n, m in r["arms"].items()},
+        "both": r["both"], "both_why": r["both_why"], "cross": r["cross"],
+    } for r in res["rows"]} for res in results}
+    RESULTS_PATH.write_text(json.dumps(out, indent=2) + "\n")
+    return RESULTS_PATH
 
 
 def install(scene: str) -> None:
@@ -382,6 +408,7 @@ def main():
     results = [score_scene(s, quick=args.quick, verbose=not args.quiet) for s in scenes]
     if len(results) > 1:
         compare(results)
+    print(f"scores -> {save_results(results).name}")
 
 
 if __name__ == "__main__":

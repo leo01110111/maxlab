@@ -5,3 +5,23 @@
   high  (tilt>=45 roll>=270 @tilt 45)  n=110 left  9  right 15  either 22  bimanual 41
   TOTAL                                    n=330 left 26  right 54  either 72  bimanual 108
   limiting factor: no reach 318, wrist flip 105, no IK 87, collision 70
+
+=== half ===
+  low   (tilt>=45 roll>=270 @tilt 0)  n=55  left  8  right 17  either 23  bimanual 28
+  mid   (tilt>=45 roll>=270 @tilt 45)  n=55  left  8  right 19  either 23  bimanual 34
+  high  (tilt>=45 roll>=270 @tilt 45)  n=55  left  8  right 14  either 22  bimanual 36
+  TOTAL                                    n=165 left 24  right 50  either 68  bimanual 98
+  limiting factor: wrist flip 86, no reach 74, collision 71, no IK 25
+
+=== each scene over its own exposed tabletop ===
+scene             n   left  right  either  bimanual  mean tilt  mean roll  limiting factor
+full            330     26     54      72       108        36deg       300deg  no reach x318
+half            165     24     50      68        98        38deg       319deg  wrist flip x86
+
+
+=== common subset (165 shared waypoints) ===
+scene             n   left  right  either  bimanual  mean tilt  mean roll  limiting factor
+full            165     26     54      72        98        39deg       319deg  wrist flip x84
+half            165     24     50      68        98        38deg       319deg  wrist flip x86
+
+scores -> benchmark_results.json

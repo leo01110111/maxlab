@@ -21,3 +21,5 @@ __pycache__/
 
 # OS junk
 .DS_Store
+urgantry_bc/data/
+urgantry_bc/runs/

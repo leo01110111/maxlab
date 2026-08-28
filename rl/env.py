@@ -28,7 +28,7 @@ from gymnasium.spaces import Box
 import mujoco
 import mujoco.viewer
 
-from ur_sim.build_urtable import (
+from urtable_sim.build_urtable import (
     build_model, set_initial_pose, block_height, pick_success,
     BLOCK_REST_Z, BLOCK_INIT_POS, LIFT_SUCCESS_H, GRIPPER_OPEN, GRIPPER_CLOSED,
     apply_initial_view,
