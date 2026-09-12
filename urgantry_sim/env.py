@@ -50,6 +50,8 @@ class SimGantryUR7eEnv(gym.Env):
     hand (52 actuators: 12 arm joints + 2 x 20 hand joints), position-controlled.
 
     Task: lift the block off the table (see build_urgantry.pick_success).
+    spawn_props=False builds the bare scene (no block, no cardboard tray); reward
+    is then always 0 and the episode only ends by truncation.
 
     Action: 52 actuator targets. With normalized_actions=True the action space is
     Box(-1, 1) (OGPO style) mapped onto each actuator's ctrlrange; otherwise raw
@@ -69,9 +71,11 @@ class SimGantryUR7eEnv(gym.Env):
         normalized_actions: bool = False,
         prompt: str = "",
         show_viewer: bool = False,
+        spawn_props: bool = True,
     ):
         super().__init__()
-        self.model = build_model()
+        self.spawn_props = spawn_props
+        self.model = build_model(spawn_props)
         self.data = mujoco.MjData(self.model)
         self.image_size = image_size
         self.normalized_actions = normalized_actions
@@ -188,13 +192,16 @@ class SimGantryUR7eEnv(gym.Env):
         self._sync_viewer()
         obs = self._get_obs()
 
+        truncated = self._step_count >= self.max_episode_steps
+        if not self.spawn_props:
+            return obs, 0.0, False, truncated, {"success": 0}
+
         # Pick task: lift the block. Sparse success reward + a small shaping term
         # on block height so the signal isn't completely flat for eval logging.
         success = pick_success(self.model, self.data)
         height_gain = block_height(self.model, self.data) - self._block_rest_z
         reward = 1.0 if success else max(0.0, height_gain)
         terminated = bool(success)
-        truncated = self._step_count >= self.max_episode_steps
         info = {"success": int(success), "block_height": block_height(self.model, self.data)}
         return obs, reward, terminated, truncated, info
 

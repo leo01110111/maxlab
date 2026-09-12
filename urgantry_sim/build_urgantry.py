@@ -219,9 +219,36 @@ def _materials(spec: mujoco.MjSpec) -> None:
     cardboard_mat.textures[mujoco.mjtTextureRole.mjTEXROLE_RGB] = "cardboard"
 
 
-def build_spec() -> mujoco.MjSpec:
-    """Floor, room, table, gantry column, two hanging UR7e arms, props and the
-    overhead camera."""
+def _add_props(wb: mujoco.MjsBody) -> None:
+    # --- graspable block (free joint) for the pick task ---------------------
+    block = wb.add_body(name="block", pos=list(BLOCK_INIT_POS))
+    block.add_freejoint(name="block_joint")
+    block.add_geom(name="block", type=mujoco.mjtGeom.mjGEOM_BOX,
+                   size=[BLOCK_HALF] * 3, rgba=BLOCK_RGBA,
+                   mass=0.05, friction=[1.0, 0.01, 0.001])
+
+    # --- open-top cardboard tray (free joint) -------------------------------
+    box_half = BOX_OUTER / 2
+    box_in_half = box_half - BOX_WALL_T
+    box = wb.add_body(name="cardboard_box", pos=list(BOX_INIT_POS))
+    box.add_freejoint(name="cardboard_box_joint")
+    box.add_geom(name="cardboard_box_floor", type=mujoco.mjtGeom.mjGEOM_BOX,
+                 size=[box_half, box_half, BOX_FLOOR_T / 2], material="cardboard", mass=0.03)
+    wall_z = BOX_FLOOR_T / 2 + BOX_WALL_H / 2
+    for name, size, pos in (
+        ("neg_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [-box_in_half, 0, wall_z]),
+        ("pos_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [box_in_half, 0, wall_z]),
+        ("neg_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, -box_in_half, wall_z]),
+        ("pos_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, box_in_half, wall_z]),
+    ):
+        box.add_geom(name=f"cardboard_box_wall_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
+                     size=size, pos=pos, material="cardboard", mass=0.01)
+
+
+
+def build_spec(spawn_props: bool = True) -> mujoco.MjSpec:
+    """Floor, room, table, gantry column, two hanging UR7e arms, the overhead
+    camera, and (when spawn_props) the graspable block and cardboard tray."""
     spec = mujoco.MjSpec()
     spec.compiler.autolimits = True
     # Offscreen buffer sized for the OV9782 wrist cameras (1280x800); covers the
@@ -317,29 +344,8 @@ def build_spec() -> mujoco.MjSpec:
         spec.add_sensor(name=f"{side}_ft_torque", type=mujoco.mjtSensor.mjSENS_TORQUE,
                         objtype=mujoco.mjtObj.mjOBJ_SITE, objname=f"{side}_ft_site")
 
-    # --- graspable block (free joint) for the pick task ---------------------
-    block = wb.add_body(name="block", pos=list(BLOCK_INIT_POS))
-    block.add_freejoint(name="block_joint")
-    block.add_geom(name="block", type=mujoco.mjtGeom.mjGEOM_BOX,
-                   size=[BLOCK_HALF] * 3, rgba=BLOCK_RGBA,
-                   mass=0.05, friction=[1.0, 0.01, 0.001])
-
-    # --- open-top cardboard tray (free joint) -------------------------------
-    box_half = BOX_OUTER / 2
-    box_in_half = box_half - BOX_WALL_T
-    box = wb.add_body(name="cardboard_box", pos=list(BOX_INIT_POS))
-    box.add_freejoint(name="cardboard_box_joint")
-    box.add_geom(name="cardboard_box_floor", type=mujoco.mjtGeom.mjGEOM_BOX,
-                 size=[box_half, box_half, BOX_FLOOR_T / 2], material="cardboard", mass=0.03)
-    wall_z = BOX_FLOOR_T / 2 + BOX_WALL_H / 2
-    for name, size, pos in (
-        ("neg_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [-box_in_half, 0, wall_z]),
-        ("pos_x", [BOX_WALL_T / 2, box_half, BOX_WALL_H / 2], [box_in_half, 0, wall_z]),
-        ("neg_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, -box_in_half, wall_z]),
-        ("pos_y", [box_in_half, BOX_WALL_T / 2, BOX_WALL_H / 2], [0, box_in_half, wall_z]),
-    ):
-        box.add_geom(name=f"cardboard_box_wall_{name}", type=mujoco.mjtGeom.mjGEOM_BOX,
-                     size=size, pos=pos, material="cardboard", mass=0.01)
+    if spawn_props:
+        _add_props(wb)
 
     # --- camera (Intel RealSense D435) --------------------------------------
     quat = _lookat_quat(CAM_POS, CAM_TARGET)
@@ -353,8 +359,8 @@ def build_spec() -> mujoco.MjSpec:
     return spec
 
 
-def build_model() -> mujoco.MjModel:
-    return build_spec().compile()
+def build_model(spawn_props: bool = True) -> mujoco.MjModel:
+    return build_spec(spawn_props).compile()
 
 
 # ======================================================================== #
@@ -387,10 +393,10 @@ def set_initial_pose(model: mujoco.MjModel, data: mujoco.MjData) -> None:
         set_hand(model, data, prefix[:-1], HAND_OPEN)
 
     # free joint qpos is [x, y, z, qw, qx, qy, qz]
-    adr = model.joint("block_joint").qposadr[0]
-    data.qpos[adr:adr + 7] = [*BLOCK_INIT_POS, 1, 0, 0, 0]
-    adr = model.joint("cardboard_box_joint").qposadr[0]
-    data.qpos[adr:adr + 7] = [*BOX_INIT_POS, 1, 0, 0, 0]
+    if has_props(model):
+        for joint, pos in (("block_joint", BLOCK_INIT_POS), ("cardboard_box_joint", BOX_INIT_POS)):
+            adr = model.joint(joint).qposadr[0]
+            data.qpos[adr:adr + 7] = [*pos, 1, 0, 0, 0]
 
 
 def hand_actuators(side: str) -> list[str]:
@@ -406,6 +412,10 @@ def set_hand(model: mujoco.MjModel, data: mujoco.MjData, side: str, curl: float)
         act = model.actuator(name)
         lo, hi = act.ctrlrange
         data.ctrl[act.id] = float(np.clip(curl, lo, hi))
+
+
+def has_props(model: mujoco.MjModel) -> bool:
+    return mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "block") >= 0
 
 
 def block_height(model: mujoco.MjModel, data: mujoco.MjData) -> float:
@@ -444,10 +454,10 @@ def capture_state(data: mujoco.MjData, viewer) -> None:
           [round(float(data.qpos[i]), 4) for i in range(6)], "\n")
 
 
-def build_scene() -> tuple[mujoco.MjModel, mujoco.MjData]:
+def build_scene(spawn_props: bool = True) -> tuple[mujoco.MjModel, mujoco.MjData]:
     """Build the scene and return model + data initialized to the home pose, with
     the position actuators commanded to hold it and forward kinematics evaluated."""
-    model = build_model()
+    model = build_model(spawn_props)
     data = mujoco.MjData(model)
     set_initial_pose(model, data)
     mujoco.mj_forward(model, data)

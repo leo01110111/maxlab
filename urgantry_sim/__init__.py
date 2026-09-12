@@ -11,6 +11,7 @@ so any Gymnasium-based RL/eval code can do:
     import urgantry_sim  # noqa: F401 -- registers "SimGantryUR7e-v0"
 
     env = gym.make("SimGantryUR7e-v0")
+    bare = gym.make("SimGantryUR7e-v0", spawn_props=False)  # no cube / tray
 
 See env.py:SimGantryUR7eEnv for the observation/action spec and task.
 """
