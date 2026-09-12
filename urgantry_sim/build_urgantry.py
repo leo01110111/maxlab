@@ -44,7 +44,7 @@ UR7E_PATH = str(ASSET_DIR / "universal_robots_ur5e" / "ur5e.xml")
 # The hand MJCF + meshes under `wuji_hand/` are a verbatim copy of
 # wuji-technology/wuji_hand_description; left.xml / right.xml are mirrored models
 # sharing one palm frame convention: fingers grow along palm +z, the grasping side
-# faces palm -x.
+# faces palm +x (measured: curling moves the fingertips toward +x).
 HAND_PATHS = {side: str(ASSET_DIR / "wuji_hand" / "mjcf" / f"{side}.xml")
               for side in ("left", "right")}
 
@@ -86,8 +86,13 @@ ARM_MOUNT_X = 0.155                    # mount center offset from the column axi
 ARM_Z = COL_TOP_Z - 0.06               # base flange height
 
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow", "wrist_1", "wrist_2", "wrist_3"]
-LEFT_HOME_POSE = [ 1.3969, -1.6581,  2.3117, -2.3623,  0.7424, 0.0]
-RIGHT_HOME_POSE = [-1.3969, -1.4835, -2.3117, -0.7793, -0.7424, 0.0]
+# Home: hands over the table, palms facing the board and backs of the hands
+# toward the overhead camera, fingers pointing away from the mount -- the way
+# hands appear in egocentric video. Solved by IK for the flange at
+# (+-0.358, 0.092, 1.032) with the grasp side (palm +x) -> world -z and
+# palm +z (fingers) -> world +y.
+LEFT_HOME_POSE = [ 1.7002, -1.5626,  1.6061, -0.0435,  1.7002,  0.7908]
+RIGHT_HOME_POSE = [-1.7002, -1.5789, -1.6061, -3.0981, -1.7002, -0.7908]
 
 # Wuji hand: 5 fingers x 4 position-controlled joints per hand, ctrl in radians.
 # joint1 = spread/abduction (thumb: rotation), joint2..4 = curl. All-zero ctrl is
@@ -99,7 +104,7 @@ HAND_CURL_CLOSED = 1.2
 
 # The palm bolts straight to the tool flange (palm frame = flange frame), so a
 # quat here rolls the hand about the flange axis. The right hand is rolled 180 deg,
-# putting its grasping side (palm -x) on the opposite side from the left's.
+# putting its grasping side (palm +x) on the opposite side from the left's.
 HAND_ROLL = {
     "left": [1.0, 0.0, 0.0, 0.0],
     "right": [0.0, 0.0, 0.0, 1.0],
