@@ -82,14 +82,14 @@ HEAD_Z = COL_TOP_Z + HEAD_T / 2
 # Both arms hang upside down (base flange up, arm pointing down) and are rolled
 # 45 deg outward about +y, so the left arm leans toward -x and the right toward +x.
 ARM_TILT = np.deg2rad(45.0)
-ARM_MOUNT_X = 0.155                    # mount center offset from the column axis
+ARM_MOUNT_X = 0.33756 / 2             # mount center offset from the column axis; 337.56 mm between mounts on the Vention head
 ARM_Z = COL_TOP_Z - 0.06               # base flange height
 
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow", "wrist_1", "wrist_2", "wrist_3"]
 # Home: hands over the table, palms facing the board and backs of the hands
 # toward the overhead camera, fingers pointing away from the mount -- the way
 # hands appear in egocentric video. Solved by IK for the flange at
-# (+-0.358, 0.092, 1.032) with the grasp side (palm +x) -> world -z and
+# (+-0.372, 0.092, 1.032) with the grasp side (palm +x) -> world -z and
 # palm +z (fingers) -> world +y.
 LEFT_HOME_POSE = [ 1.7002, -1.5626,  1.6061, -0.0435,  1.7002,  0.7908]
 RIGHT_HOME_POSE = [-1.7002, -1.5789, -1.6061, -3.0981, -1.7002, -0.7908]
@@ -102,9 +102,20 @@ HAND_FINGER_JOINTS = (1, 2, 3, 4)
 HAND_OPEN = 0.0
 HAND_CURL_CLOSED = 1.2
 
-# The palm bolts straight to the tool flange (palm frame = flange frame), so a
-# quat here rolls the hand about the flange axis. The right hand is rolled 180 deg,
+# A cylindrical adapter sits on the tool flange and the palm sits on the adapter,
+# rolled about the flange axis by HAND_ROLL. The right hand is rolled 180 deg,
 # putting its grasping side (palm +x) on the opposite side from the left's.
+# The palm mesh's two-hole wrist lip reaches 9.1 mm below the palm origin (palm
+# -z), so the palm origin sits that far past the adapter's top face. The UR mesh's
+# flange face is 1.06 mm short of attachment_site (measured from wrist_3 mesh
+# vertices), so the adapter starts at the mesh face, not at the site.
+FLANGE_FACE_Z = -0.00106
+ADAPTER_T = 0.0217
+ADAPTER_R = 0.0315                     # ISO 9409-1-50 flange, 63 mm
+ADAPTER_MASS = 0.09
+PALM_LIP_DEPTH = 0.0091
+HAND_MOUNT_Z = FLANGE_FACE_Z + ADAPTER_T + PALM_LIP_DEPTH
+ADAPTER_RGBA = [0.75, 0.76, 0.78, 1]
 HAND_ROLL = {
     "left": [1.0, 0.0, 0.0, 0.0],
     "right": [0.0, 0.0, 0.0, 1.0],
@@ -177,15 +188,23 @@ def _lookat_quat(cam_pos, target):
 
 
 def _arm_with_hand(side: str) -> mujoco.MjSpec:
-    """Load a UR7e and bolt the matching (left/right) Wuji hand onto its wrist
-    attachment site. The hand's 20 position actuators and its contact exclusions
-    come along with the attach, prefixed 'hand_' (final actuator names e.g.
+    """Load a UR7e, add the flange adapter body (frame = flange frame, i.e. the
+    attachment site), and bolt the matching (left/right) Wuji hand onto the
+    adapter. The hand's 20 position actuators and its contact exclusions come
+    along with the attach, prefixed 'hand_' (final actuator names e.g.
     'left_hand_finger1_joint1')."""
     arm = mujoco.MjSpec.from_file(UR7E_PATH)
+    flange = arm.site("attachment_site")
+    adapter = arm.body("wrist_3_link").add_body(name="flange_adapter",
+                                                pos=flange.pos, quat=flange.quat)
+    adapter.add_geom(name="flange_adapter", type=mujoco.mjtGeom.mjGEOM_CYLINDER,
+                     size=[ADAPTER_R, ADAPTER_T / 2, 0],
+                     pos=[0, 0, FLANGE_FACE_Z + ADAPTER_T / 2],
+                     mass=ADAPTER_MASS, rgba=ADAPTER_RGBA)
     hand = mujoco.MjSpec.from_file(HAND_PATHS[side])
     palm = hand.body("palm_link")
     palm.quat = HAND_ROLL[side]
-    arm.site("attachment_site").attach_body(palm, "hand_", "")
+    adapter.add_site(name="hand_mount", pos=[0, 0, HAND_MOUNT_Z]).attach_body(palm, "hand_", "")
     return arm
 
 
@@ -333,12 +352,13 @@ def build_spec(spawn_props: bool = True) -> mujoco.MjSpec:
                        rgba=COL_PLATE, contype=0, conaffinity=0)
         mount.add_frame().attach_body(_arm_with_hand(side).body("base"), f"{side}_", "")
 
-    # Wrist F/T: force+torque sensors at each palm report the wrench transmitted
-    # between the hand subtree and wrist_3, in the flange (site) frame -- the same
-    # quantity a UR wrist F/T sensor measures. Reading is nonzero at rest (tool
-    # weight), so consumers should tare against a no-contact reference pose.
+    # Wrist F/T: force+torque sensors at each flange (attachment_site) report the wrench
+    # transmitted between the adapter+hand subtree and wrist_3, in the flange
+    # frame -- the same quantity a UR wrist F/T sensor measures. Reading is
+    # nonzero at rest (tool weight), so consumers should tare against a
+    # no-contact reference pose.
     for side in ("left", "right"):
-        spec.body(f"{side}_hand_palm_link").add_site(name=f"{side}_ft_site")
+        spec.body(f"{side}_flange_adapter").add_site(name=f"{side}_ft_site")
         spec.add_sensor(name=f"{side}_ft_force", type=mujoco.mjtSensor.mjSENS_FORCE,
                         objtype=mujoco.mjtObj.mjOBJ_SITE, objname=f"{side}_ft_site")
         spec.add_sensor(name=f"{side}_ft_torque", type=mujoco.mjtSensor.mjSENS_TORQUE,
